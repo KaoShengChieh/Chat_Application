@@ -13,7 +13,7 @@ public class LocalCache
 	private static final String database = "cache";
 	private static final String userList = "User";
 	private static final String friendList = "FriendList";
-	private static final String userListFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT, KeepLogIn INTEGER de DEFAULT 0)";
+	private static final String userListFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT, KeepLogIn INTEGER DEFAULT 0)";
 	private static final String friendListFields = "(UserID INTEGER, FriendID INTEGER, FriendName TEXT, PRIMARY KEY (UserID, FriendID))";
 	private static final String msgFields = "(MsgID INTEGER PRIMARY KEY, FriendID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
@@ -29,7 +29,8 @@ public class LocalCache
 			}
 			stmt.execute("CREATE TABLE " + userList + userListFields);
 		} catch (SQLException e) {
-			System.err.println("Fail to fetch UserInfo :" + e.getMessage());
+			System.err.println("Fail to fetch " + userList + " Information: " + e.getMessage());
+			System.exit(0);
 		}
 	}
 	
@@ -38,6 +39,7 @@ public class LocalCache
 			conn = DriverManager.getConnection(protocol + filepath + database);
 		} catch (SQLException e) {
 			System.err.println("Fail to connect cache database: " + e.getMessage());
+			System.exit(0);
 		}
 	}
 	
@@ -48,6 +50,7 @@ public class LocalCache
 			}
 		} catch (SQLException e) {
 			System.err.println("Fail to close cache database: " + e.getMessage());
+			System.exit(0);
 		}
 	}
 	

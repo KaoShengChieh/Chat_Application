@@ -11,10 +11,10 @@ public class LocalCache
 	private static final String protocol = "jdbc:sqlite:";
 	private static final String filepath = "./data/";
 	private static final String database = "cache";
-	private static final String userList = "User";
-	private static final String friendList = "FriendList";
-	private static final String userListFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT, KeepLogIn INTEGER DEFAULT 0)";
-	private static final String friendListFields = "(UserID INTEGER, FriendID INTEGER, FriendName TEXT, PRIMARY KEY (UserID, FriendID))";
+	private static final String userTable = "User";
+	private static final String friendTable = "Friend";
+	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT, KeepLogIn INTEGER DEFAULT 0)";
+	private static final String friendFields = "(UserID INTEGER, FriendID INTEGER, FriendName TEXT, PRIMARY KEY (UserID, FriendID))";
 	private static final String msgFields = "(MsgID INTEGER PRIMARY KEY, FriendID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
 	private Statement stmt;
@@ -24,12 +24,12 @@ public class LocalCache
 		
 		try {
 			stmt = conn.createStatement();
-			if (conn.getMetaData().getTables(null, null, userList, null).next()) {
+			if (conn.getMetaData().getTables(null, null, userTable, null).next()) {
 				return;
 			}
-			stmt.execute("CREATE TABLE " + userList + userListFields);
+			stmt.execute("CREATE TABLE " + userTable + userFields);
 		} catch (SQLException e) {
-			System.err.println("Fail to fetch " + userList + " Information: " + e.getMessage());
+			System.err.println("Fail to fetch " + userTable + " Information: " + e.getMessage());
 			System.exit(0);
 		}
 	}
@@ -57,18 +57,18 @@ public class LocalCache
 	public void LogIn(int userID, String userName, String password, boolean isKeepLogIn) throws SQLException {
 		ResultSet resultSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + userList + " " +
+			"FROM " + userTable + " " +
 			"WHERE UserID = " + userID);
 		
 		if (resultSet.next() == false) {
 			stmt.execute(
-				"INSERT INTO " + userList + " " +
+				"INSERT INTO " + userTable + " " +
 				"VALUES (" + userID +  ", '" + userName +  "', '" + password + "', " + (isKeepLogIn ? "1)": "0)"));
 			stmt.execute("CREATE TABLE " + userID + msgFields);
-			stmt.execute("CREATE TABLE " + friendList + friendListFields);
+			stmt.execute("CREATE TABLE " + friendTable + friendFields);
 		} else {
 			stmt.execute(
-			"UPDATE " + userList + " " +
+			"UPDATE " + userTable + " " +
 			"SET KeepLogIn = " + (isKeepLogIn ? "1 " : "0 ") +
 			"WHERE UserID = " + userID);
 		}
@@ -77,7 +77,7 @@ public class LocalCache
 	public User AutoLogIn() throws SQLException {
 		ResultSet resultSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + userList + " " +
+			"FROM " + userTable + " " +
 			"WHERE KeepLogIn = 1");
 		
 		if (resultSet.next() == false) {
@@ -93,21 +93,21 @@ public class LocalCache
 			"VALUES (" + message.msgID +  ", " + message.senderID +  ", '" + message.timestamp + "', '" + message.content + "')");
 	}
 	
-	public List<Pair> getFriendList(int userID) throws SQLException {
+	public List<Pair<User, Message>> getFriendList(int userID) throws SQLException {
 		int friendID;
 		User friend = null;
 		Message newestMsg = null;
-		List<Pair> friendList = new ArrayList<>();
+		List<Pair<User, Message>> friendList = new ArrayList<>();
 		
 		ResultSet friendSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + friendList + " " +
+			"FROM " + friendTable + " " +
 			"WHERE UserID = " + userID);
 		
 		while (friendSet.next()) {
 			friendID = friendSet.getInt("FriendID");
 			friend = new User(friendID, friendSet.getString("FriendName"));
-			friendList.add(new Pair(friend , getNewestMessage(userID, friendID)));
+			friendList.add(new Pair<>(friend , getNewestMessage(userID, friendID)));
 		}	
 		
 		return friendList;
@@ -155,7 +155,7 @@ public class LocalCache
 	
 	public void addFriend(int userID, int friendID, String friendName) throws SQLException {
 		stmt.execute(
-			"INSERT INTO " + friendList + " " +
+			"INSERT INTO " + friendTable + " " +
 			"VALUES (" + userID +  ", " + friendID +  ", '" + friendName + "')");
 	}
 }

@@ -6,4 +6,9 @@ public class Packet implements java.io.Serializable {
 	}
 	public Type type;
 	public Message message;
+
+	Packet(Type type, Message message) {
+		this.type = type;
+		this.message = message;
+	}
 }

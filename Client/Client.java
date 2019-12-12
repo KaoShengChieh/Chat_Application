@@ -15,12 +15,15 @@ public class Client
 	private ObjectOutputStream outputObject;
 	private BlockingQueue<Packet> send_queue;
 	private BlockingQueue<Packet> recv_queue;
+	//private GUI myGUI;
 
 	public static void main(String args[]) {
 		Client client = new Client(CONFIG);
 		
 		try {
-			Thread sendMessage = new Thread(new Runnable() { 
+			//client.myGUI.start();
+		
+			new Thread(new Runnable() { 
 				public void run() { 
 					Packet send_packet = null;
 					try {
@@ -33,8 +36,9 @@ public class Client
                         client.close("Disconnected with server");
                     } 
 				}
-			}); 
-			Thread readMessage = new Thread(new Runnable() { 
+			}).start(); 
+			
+			new Thread(new Runnable() { 
 				public void run() { 
 					Packet recv_packet = null;
 					try {
@@ -47,13 +51,20 @@ public class Client
                         client.close("Disconnected with server");
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
-                        client.close("Unexpected error");
+                        client.close("Fail to Serialized/Deserialized");
                     }
 				} 
-			});
-			
-			sendMessage.start(); 
-			readMessage.start();
+			}).start();
+			/*
+			synchronized (client.myGUI) {
+				while (client.myGUI.isQuit() == false) {
+					try {
+						client.myGUI.wait();
+					} catch (InterruptedException e)  {
+						Thread.currentThread().interrupt(); 
+					}
+				}
+			}*/
 		} catch (Exception e) {
 			e.printStackTrace();
 			client.close("Unexpected error");
@@ -104,15 +115,9 @@ public class Client
 			this.close("Connection to server failed");
 		}
 		
-		try {
-			this.send_queue = new BlockingQueue<>();
-			this.recv_queue = new BlockingQueue<>();
-			//GUI myGUI = new GUI(send_queue, recv_queue);
-			//myGUI.start();
-		} catch (Exception e) {
-			this.close("Fail to open GUI");
-			e.printStackTrace();
-		}
+		send_queue = new BlockingQueue<>();
+		recv_queue = new BlockingQueue<>();
+		//myGUI = new GUI(client.send_queue, recv_queue);
 	}
 	
 	public Packet readSocket() throws IOException, ClassNotFoundException {
@@ -143,9 +148,10 @@ public class Client
 			if (socket != null) {
 				socket.close();
 			}
-			System.out.println("Connection closed");
 		} catch (IOException e) {
 			System.err.println("Socket close error");
+		} finally {
+			System.out.println("Connection closed");
 		}
 	}
 	

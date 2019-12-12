@@ -1,6 +1,11 @@
 #!/bin/bash
 
+set +e
+
+rm *.class
+
 set -e
 
-javac -cp .:./lib/ Client.java
-java -cp .:./lib/ Client 
+javac -cp .:lib:lib/* Client.java -d .
+
+java -cp .:lib:lib/* Client

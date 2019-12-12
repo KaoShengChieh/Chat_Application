@@ -1,6 +1,11 @@
 #!/bin/bash
 
+set +e
+
+rm *.class
+
 set -e
 
-javac -cp .:./lib/ Server.java
-java -cp .:./lib/ Server
+javac -cp .:lib:lib/* Server.java -d .
+
+java -cp .:lib:lib/* Server

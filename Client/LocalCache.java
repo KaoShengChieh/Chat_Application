@@ -1,3 +1,6 @@
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -6,44 +9,47 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class LocalCache
+public class LocalCache implements ProxyServer
 {
 	private static final String protocol = "jdbc:sqlite:";
 	private static final String filepath = "./data/";
 	private static final String database = "cache";
 	private static final String userTable = "User";
 	private static final String friendTable = "Friend";
-	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT, KeepLogIn INTEGER DEFAULT 0)";
-	private static final String friendFields = "(UserID INTEGER, FriendID INTEGER, FriendName TEXT, PRIMARY KEY (UserID, FriendID))";
-	private static final String msgFields = "(MsgID INTEGER PRIMARY KEY, FriendID INTEGER, Timestamp DATETIME, Content TEXT)";
+	private static final String messageTable = "Message";
+	private static final String userFields = "(UserName TEXT PRIMARY KEY, Password TEXT)";
+	private static final String friendFields = "(FriendID INTEGER PRIMARY KEY, FriendName TEXT)";
+	private static final String messageFields = "(MessageID INTEGER PRIMARY KEY, SenderID INTEGER, ReceiverID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
 	private Statement stmt;
+	private View GUI;
+	private BlockingQueue<Packet> sendQueue;
+	private BlockingQueue<Packet> recvQueue;
+	private ClientSocket clientSocket;
+	private int userID;
 	
-	public LocalCache() {
-		connect();
+	public LocalCache(View GUI) {
+		this.GUI = GUI;
+		this.connectDatabase();
 		
-		try {
-			stmt = conn.createStatement();
-			if (conn.getMetaData().getTables(null, null, userTable, null).next()) {
-				return;
-			}
-			stmt.execute("CREATE TABLE " + userTable + userFields);
-		} catch (SQLException e) {
-			System.err.println("Fail to fetch " + userTable + " Information: " + e.getMessage());
-			System.exit(0);
-		}
+		sendQueue = new BlockingQueue<>();
+		recvQueue = new BlockingQueue<>();
+		clientSocket = new ClientSocket(sendQueue, recvQueue);
+		
+		userID = -1;
 	}
 	
-	private void connect() {
+	private void connectDatabase() {
 		try {
 			conn = DriverManager.getConnection(protocol + filepath + database);
+			stmt = conn.createStatement();
 		} catch (SQLException e) {
 			System.err.println("Fail to connect cache database: " + e.getMessage());
 			System.exit(0);
 		}
 	}
 	
-	private void close() {
+	private void closeDatabase() {
 		try {
 			if (conn != null) {
 				conn.close();
@@ -54,108 +60,273 @@ public class LocalCache
 		}
 	}
 	
-	public void LogIn(int userID, String userName, String password, boolean isKeepLogIn) throws SQLException {
+	public boolean getOnline() {
+		clientSocket.connect();
+		return clientSocket.isLive;
+	}
+	
+	public boolean autoLogIn() throws SQLException {
+		if (conn.getMetaData().getTables(null, null, userTable, null).next() == false) {
+			return false;
+		}
+		
 		ResultSet resultSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + userTable + " " +
-			"WHERE UserID = " + userID);
+			"FROM " + userTable);
 		
 		if (resultSet.next() == false) {
+			return false;
+		} else {
+			Message message = new Message();
+			message.content = resultSet.getString("UserName") +
+				resultSet.getString("Password");
+			sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
+			Packet recv_packet = recvQueue.pop();
+			userID = recv_packet.message.senderID;
+			
+			return userID != -1 ? true : false;
+		}
+	}
+	
+	public boolean logIn(String userName, String password, boolean KeepLogIn) throws SQLException {
+		password = encrypt(password);
+		
+		Message message = new Message();
+		message.content = userName + password;
+		sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
+		Packet recv_packet = recvQueue.pop();
+		userID = recv_packet.message.senderID;
+		
+		if (userID == -1) {
+			GUI.setErrorMessage(recv_packet.message.content);
+			return false;
+		}
+		
+		stmt.execute("DROP TABLE IF EXISTS " + userTable);
+		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
+		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
+		
+		if (KeepLogIn) {
+			stmt.execute("CREATE TABLE " + userTable + userFields);
 			stmt.execute(
 				"INSERT INTO " + userTable + " " +
-				"VALUES (" + userID +  ", '" + userName +  "', '" + password + "', " + (isKeepLogIn ? "1)": "0)"));
-			stmt.execute("CREATE TABLE " + userID + msgFields);
-			stmt.execute("CREATE TABLE " + friendTable + friendFields);
-		} else {
-			stmt.execute(
-			"UPDATE " + userTable + " " +
-			"SET KeepLogIn = " + (isKeepLogIn ? "1 " : "0 ") +
-			"WHERE UserID = " + userID);
+				"VALUES ('" + userName +  "', '" + password + "')");
 		}
-	}
-	
-	public User AutoLogIn() throws SQLException {
-		ResultSet resultSet = stmt.executeQuery(
-			"SELECT * " +
-			"FROM " + userTable + " " +
-			"WHERE KeepLogIn = 1");
+		stmt.execute("CREATE TABLE " + friendTable + friendFields);
+		stmt.execute("CREATE TABLE " + messageTable + messageFields);
 		
-		if (resultSet.next() == false) {
-			return null;
+		this.update();
+		
+		return true;
+	}
+	
+	public boolean signUp(String userName, String password) {
+		password = encrypt(password);
+		
+		Message message = new Message();
+		message.content = userName + password;
+		sendQueue.push(new Packet(Packet.Type.SIGN_UP, message));
+		Packet recv_packet = recvQueue.pop();
+		String errorMessage = recv_packet.message.content;
+		
+		if (errorMessage == null) {
+			return true;
 		} else {
-			return new User(resultSet.getInt("UserID"), resultSet.getString("UserName"));
+			GUI.setErrorMessage(errorMessage);
+			return false;
 		}
 	}
-	
-	public void update(int userID, Message message) throws SQLException {
-		stmt.execute(
-			"INSERT INTO " + userID + " " +
-			"VALUES (" + message.msgID +  ", " + message.senderID +  ", '" + message.timestamp + "', '" + message.content + "')");
-	}
-	
-	public List<Pair<User, Message>> getFriendList(int userID) throws SQLException {
-		int friendID;
-		User friend = null;
-		Message newestMsg = null;
+
+	public List<Pair<User, Message>> getFriendList() throws SQLException {
 		List<Pair<User, Message>> friendList = new ArrayList<>();
 		
-		ResultSet friendSet = stmt.executeQuery(
+		ResultSet resultSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + friendTable + " " +
-			"WHERE UserID = " + userID);
+			"FROM " + friendTable);
 		
-		while (friendSet.next()) {
-			friendID = friendSet.getInt("FriendID");
-			friend = new User(friendID, friendSet.getString("FriendName"));
-			friendList.add(new Pair<>(friend , getNewestMessage(userID, friendID)));
+		while (resultSet.next()) {
+			int friendID = resultSet.getInt("FriendID");
+			User friend = new User(friendID, resultSet.getString("FriendName"));
+			friendList.add(new Pair<>(friend, getNewestMessage(friendID)));
 		}	
 		
 		return friendList;
 	}
 	
-	private Message getNewestMessage(int userID, int friendID) throws SQLException {
+	private Message getNewestMessage(int friendID) throws SQLException {
 		Message message = new Message();
 		
 		ResultSet resultSet = stmt.executeQuery(
 			"SELECT * " +
-			"FROM " + userID + " " +
-			"WHERE FriendID = " + friendID + " " +
-			"GROUP BY MsgID " + 
-			"HAVING MAX(MsgID)");
+			"FROM " + messageTable + " " +
+			"WHERE MessageID IN (" +
+				"SELECT MAX(MessageID) " +
+				"FROM " + messageTable + " " +
+				"WHERE SenderID  = " + friendID + " " +
+				"OR ReceiverID  = " + friendID + ")");
 		
-		if (resultSet.next() == true) {
-			message.msgID = resultSet.getInt("MsgID");
-			message.senderID = resultSet.getInt("FriendID");
-			message.timestamp = resultSet.getString("Timestamp");
-			message.content = resultSet.getString("Content");
+		if (resultSet.next() == false) {
+			return null;
 		}
+		
+		message.msgID = resultSet.getInt("MessageID");
+		message.senderID = resultSet.getInt("SenderID");
+		message.receiverID = resultSet.getInt("ReceiverID");
+		message.timestamp = resultSet.getString("Timestamp");
+		message.content = resultSet.getString("Content");
 		
 		return message;
 	}
 	
-	public List<Message> getMsgHistoryOfAFriend(int userID, int friendID) throws SQLException {
+	public boolean addFriend(String friendName) {
+		if (clientSocket.isLive == false) {
+			return false;
+		}
+		
+		Message message = new Message();
+		
+		message.senderID = userID;
+		message.content = friendName;
+	
+		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
+		
+		return true;
+	}
+	
+	public List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException {
+		List<Message> messageHistory = new ArrayList<>();
+		ResultSet resultSet = null;
 		Message message = null;
-		List<Message> msgHistory = new ArrayList<>();
-		ResultSet resultSet = stmt.executeQuery(
-			"SELECT * " +
-			"FROM " + userID + " " +
-			"WHERE FriendID = " + friendID);
+		
+		if (smallestMessageID == -1) {
+			resultSet = stmt.executeQuery(
+				"SELECT TOP(30) * " +
+				"FROM " + messageTable + " " +
+				"WHERE SenderID  = " + friend.ID + " " +
+				"OR ReceiverID  = " + friend.ID + " " +
+				"ORDER BY MessageID DESC");
+		} else {
+			resultSet = stmt.executeQuery(
+				"SELECT TOP(30) * " +
+				"FROM " + messageTable + " " +
+				"WHERE MessageID < " + smallestMessageID + " " +
+				"AND (SenderID  = " + friend.ID + " " +
+				"OR ReceiverID  = " + friend.ID + ") " +
+				"ORDER BY MessageID DESC");
+		}
 		
 		while (resultSet.next()) {
 			message = new Message();
-			message.msgID = resultSet.getInt("MsgID");
-			message.senderID = resultSet.getInt("FriendID");
+			message.msgID = resultSet.getInt("MessageID");
+			message.senderID = resultSet.getInt("SenderID");
+			message.receiverID = resultSet.getInt("ReceiverID");
 			message.timestamp = resultSet.getString("Timestamp");
 			message.content = resultSet.getString("Content");
-			msgHistory.add(message);
+			messageHistory.add(message);
 		}
 		
-		return msgHistory;
+		return messageHistory;
 	}
 	
-	public void addFriend(int userID, int friendID, String friendName) throws SQLException {
+	public boolean sendMessage(User friend, String content) {
+		if (clientSocket.isLive == false) {
+			return false;
+		}
+		
+		Message message = new Message();
+		
+		message.senderID = userID;
+		message.receiverID = friend.ID;
+		message.content = content;
+	
+		sendQueue.push(new Packet(Packet.Type.MESSAGE, message));
+		
+		return true;
+	}
+	
+	public boolean reconnect() {
+		clientSocket.connect();
+		this.update();
+		
+		return clientSocket.isLive;
+	}
+	
+	public void logOut() throws SQLException {
+		userID = -1;
+		stmt.execute("DROP TABLE IF EXISTS " + userTable);
+		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
+		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
+		sendQueue.push(new Packet(Packet.Type.SIGN_UP, null));
+	}
+	
+	public void quit() {
+		clientSocket.close();
+		this.closeDatabase();
+		sendQueue.push(new Packet(Packet.Type.QUIT, null));
+	}
+	
+	private void update() {
+	/***************** TODO *******************
+	 * 1. Update cache
+	 * 2. Open thread process received packet
+	 * 3. Monitor client socket
+	 ******************************************/
+	}
+	
+	private void recvMessage(Message message) throws SQLException {
+		if (message.msgID == -1) {
+			GUI.setErrorMessage(message.content);
+			return;
+		}
+		
+		GUI.newMessage(message);
+		
+		stmt.execute(
+			"INSERT INTO " + userID + " " +
+			"VALUES (" + message.msgID +  ", " +
+				message.senderID +  ", " +
+				message.receiverID +  ", '" +
+				message.timestamp + "', '" +
+				message.content + "')");
+	}
+	
+	private void newFriend(Message message) throws SQLException {
+		int friendID;
+		String friendName;
+		
+		if (message.receiverID == -1) {
+			GUI.setErrorMessage(message.content);
+			return;
+		} 
+		
+		friendID = message.receiverID == userID ?
+			message.senderID : message.receiverID;
+		friendName = message.content;
+		
+		GUI.newFriend(new User(friendID, friendName));
+		
 		stmt.execute(
 			"INSERT INTO " + friendTable + " " +
-			"VALUES (" + userID +  ", " + friendID +  ", '" + friendName + "')");
+			"VALUES (" + friendID +  ", '" + friendName + "')");
+	}
+	
+	private String encrypt(String strToEncrypt) {
+		try { 
+			MessageDigest md = MessageDigest.getInstance("MD5"); 
+			
+			byte[] messageDigest = md.digest(strToEncrypt.getBytes()); 
+			
+			BigInteger no = new BigInteger(1, messageDigest); 
+			
+			String encryptText = no.toString(16); 
+			
+			while (encryptText.length() < 32) { 
+				encryptText = "0" + encryptText; 
+			}
+			
+			return encryptText;
+		} catch (NoSuchAlgorithmException e) { 
+			throw new RuntimeException(e); 
+		}
 	}
 }

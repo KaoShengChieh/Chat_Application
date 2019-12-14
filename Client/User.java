@@ -1,8 +1,8 @@
 public class User {
-	public int userID;
-	public String userName;
+	public int ID;
+	public String Name;
 	public User(int userID, String userName) {
-		this.userID = userID;
-		this.userName = userName;
+		this.ID = userID;
+		this.Name = userName;
 	}
 }

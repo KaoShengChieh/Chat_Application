@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.List;
 
 public interface ProxyServer {
@@ -11,19 +12,13 @@ public interface ProxyServer {
 	 * Return true, if automatically log in successfully
 	 * Return false, otherwise
 	 */
-	boolean autoLogIn();
+	boolean autoLogIn() throws SQLException;
 	
 	/*
 	 * Return true, if log in successfully
 	 * Return false, otherwise
 	 */
-	boolean logIn(String userName, String password, boolean isKeepLogIn);
-	
-	/* 
-	 * Return username, if client has logged in
-	 * Return null, otherwise
-	 */
-	String getUserName();
+	boolean logIn(String userName, String password, boolean keepLogIn) throws SQLException;
 	
 	/*
 	 * Return true, if sign up successfully
@@ -34,7 +29,7 @@ public interface ProxyServer {
 	/*
 	 * Return list of pairs of friend info and most recent message
 	 */
-	List<Pair<User, Message>> getFriendList();
+	List<Pair<User, Message>> getFriendList() throws SQLException;
 	
 	/*
 	 * Return true, if add friend successfully
@@ -43,15 +38,16 @@ public interface ProxyServer {
 	boolean addFriend(String friendName);
 	
 	/*
-	 * Return 30 most recent messages of a friend
+	 * Return 30 more previous messages of a friend
+	 * If smallestMessageID == -1, return most recent 30 ones
 	 */
-	List<Message> getMsgHistoryOfAFriend(int friendID);
+	List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException;
 	
 	/*
 	 * Return true, if send message successfully
 	 * Return false, otherwise
 	 */
-	boolean sendMessage(int friendID, String message);
+	boolean sendMessage(User friend, String message);
 	
 	/*
 	 * Return true, if reconnect successfully
@@ -63,7 +59,7 @@ public interface ProxyServer {
 	 * Return true, if log out successfully
 	 * Return false, otherwise
 	 */
-	boolean logOut();
+	void logOut() throws SQLException;
 	
 	/*
 	 * Call this when app ends.

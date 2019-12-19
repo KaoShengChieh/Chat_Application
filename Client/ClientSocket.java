@@ -56,7 +56,7 @@ public class ClientSocket
 		}
 	}
 	
-	public void connect() {		
+	public synchronized void connect() {		
 		try {
 			socket = new Socket(serverAddress, Integer.parseInt(port));
 			outputObject = new ObjectOutputStream(socket.getOutputStream());
@@ -81,6 +81,7 @@ public class ClientSocket
                         close("Disconnected with server");
                     } finally {
                     	isLive = false;
+                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				}
 			}).start(); 
@@ -101,6 +102,7 @@ public class ClientSocket
                         close("Fail to Serialized/Deserialized");
                     } finally {
                     	isLive = false;
+                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				} 
 			}).start();

@@ -53,7 +53,7 @@ public interface ProxyServer {
 	 * Return true, if reconnect successfully
 	 * Return false, otherwise
 	 */
-	boolean reconnect();
+	boolean reconnect() throws SQLException;
 	
 	/*
 	 * Return true, if log out successfully

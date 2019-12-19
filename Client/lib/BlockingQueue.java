@@ -21,7 +21,7 @@ public class BlockingQueue <T>
 		while (queue.size() == 0) {
 			try {
 				wait();
-			} catch (InterruptedException e)  {
+			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt(); 
 			}
 		}

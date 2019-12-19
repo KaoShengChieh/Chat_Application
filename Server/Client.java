@@ -1,10 +1,12 @@
-import java.util.List;
-import java.util.ListIterator;
 import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class Client {
 	private static final String protocol = "jdbc:sqlite:";
@@ -14,7 +16,7 @@ public class Client {
 	private static final String friendTable = "Friend";
 	private static final String messageTable = "Message";
 	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT)";
-	private static final String friendFields = "(UserID INTEGER, FriendID INTEGER, PRIMARY KEY (UserID, FriendID))";
+	private static final String friendFields = "(FrinedAID INTEGER, FriendBID INTEGER, PRIMARY KEY (FriendAID, FriendBID))";
 	private static final String messageFields = "(MsgID INTEGER AUTOINCREMENT PRIMARY KEY, senderID INTEGER, receiverID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
 	private Statement stmt;
@@ -234,9 +236,48 @@ public class Client {
 	private void update(Message recv_msg) {
 		try {
 			ResultSet resultSet = stmt.executeQuery(
+				"SELECT UserID AS FriendID, UserName AS FriendName" +
+				"FROM " + friendTable + ", " + userTable + " " +
+				"WHERE (FriendAID = " + userID + " " +
+					"AND UserID = FriendBID)"+
+				"OR (FriendBID = " + userID + " " +
+					"AND UserID = FriendAID)");
+			
+			StringTokenizer tokens = new StringTokenizer(recv_msg.content, "/");
+			int tokenCount = tokens.countTokens();
+			
+			if (tokenCount != 0) {
+				List<Integer> friendList = new ArrayList<>();
+				
+				while (tokens.hasMoreTokens()) {
+					friendList.add(Integer.valueOf(tokens.nextToken()));
+				}
+			
+				while (resultSet.next()) {
+					int friendID = resultSet.getInt("FriendID");
+					if (friendList.contains(friendID)) {
+						continue;
+					}
+					
+					Message send_msg = new Message();
+					send_msg.senderID = userID;
+					send_msg.receiverID = friendID;
+					send_msg.content = resultSet.getString("FriendName");
+					sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
+				}
+			} else {
+				Message send_msg = new Message();
+				send_msg.senderID = userID;
+				send_msg.receiverID = resultSet.getInt("FriendID");
+				send_msg.content = resultSet.getString("FriendName");
+				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
+			}
+			
+			resultSet = stmt.executeQuery(
 				"SELECT * " +
 				"FROM " + messageTable + " " +
-				"WHERE ReceiverID = " + recv_msg.senderID + " " +
+				"WHERE SenderID = " + userID + " " +
+				"OR ReceiverID = " + userID + ") " +
 				"AND MsgID > " + recv_msg.msgID);
 			
 			while (resultSet.next()) {
@@ -246,7 +287,7 @@ public class Client {
 				send_msg.receiverID = resultSet.getInt("ReceiverID");
 				send_msg.timestamp = resultSet.getString("Timestamp");
 				send_msg.content = resultSet.getString("Content");
-				sendQueue.push(new Packet(Packet.Type.UPDATE, send_msg));
+				sendQueue.push(new Packet(Packet.Type.MESSAGE, send_msg));
 			}
 		} catch (SQLException e) {
 			Message send_msg = recv_msg.clone();
@@ -266,6 +307,7 @@ public class Client {
 				"WHERE UserName = '" + recv_msg.content + "'");
 			
 			if (resultSet.next() == false) {
+				send_msg.receiverID = -1;
 				send_msg.content = "Username not found";
 				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 				return null;
@@ -279,9 +321,11 @@ public class Client {
 				"VALUES (" + send_msg.senderID + ", " + friendID + ")");
 			
 			send_msg.receiverID = friendID;
+			send_msg.content = recv_msg.content;
 			
 			return send_msg;
 		} catch (SQLException e) {
+			send_msg.receiverID = -1;
 			send_msg.content = "Unable to add friend: " + e.getMessage();
 			sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 			
@@ -300,9 +344,9 @@ public class Client {
 			stmt.execute(
 				"INSERT INTO " + messageTable +
 				"(senderID INTEGER, receiverID, Timestamp, Content) " +
-				"VALUES (" + recv_msg.senderID + ", " +
-					recv_msg.receiverID + ", '" +
-					recv_msg.timestamp + "', '" +
+				"VALUES (" + userID + ", " +
+					recv_msg.receiverID + ", " +
+					"datetime('now'), " +
 					recv_msg.content + "')");
 			
 			ResultSet resultSet = stmt.executeQuery(
@@ -310,10 +354,12 @@ public class Client {
 				"FROM " + messageTable);
 			resultSet.next();
 			send_msg.msgID = resultSet.getInt("MsgID");
+			send_msg.timestamp = resultSet.getString("Timestamp");
 			send_msg.content = recv_msg.content;
 			
 			return send_msg;
 		} catch (SQLException e) {
+			send_msg.msgID = -1;
 			send_msg.content = "Unable to send message: " + e.getMessage();
 			sendQueue.push(new Packet(Packet.Type.MESSAGE, send_msg));
 			

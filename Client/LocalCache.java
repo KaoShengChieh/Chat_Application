@@ -170,7 +170,6 @@ public class LocalCache implements ProxyServer
 		}
 		
 		message.msgID = resultSet.getInt("MessageID");
-		message.senderID = resultSet.getInt("SenderID");
 		message.receiverID = resultSet.getInt("ReceiverID");
 		message.timestamp = resultSet.getString("Timestamp");
 		message.content = resultSet.getString("Content");
@@ -185,7 +184,6 @@ public class LocalCache implements ProxyServer
 		
 		Message message = new Message();
 		
-		message.senderID = userID;
 		message.content = friendName;
 	
 		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
@@ -235,7 +233,6 @@ public class LocalCache implements ProxyServer
 		
 		Message message = new Message();
 		
-		message.senderID = userID;
 		message.receiverID = friend.ID;
 		message.content = content;
 	
@@ -244,7 +241,7 @@ public class LocalCache implements ProxyServer
 		return true;
 	}
 	
-	public boolean reconnect() {
+	public boolean reconnect() throws SQLException {
 		clientSocket.connect();
 		this.update();
 		
@@ -256,7 +253,7 @@ public class LocalCache implements ProxyServer
 		stmt.execute("DROP TABLE IF EXISTS " + userTable);
 		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
 		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
-		sendQueue.push(new Packet(Packet.Type.SIGN_UP, null));
+		sendQueue.push(new Packet(Packet.Type.LOG_OUT, null));
 	}
 	
 	public void quit() {
@@ -265,12 +262,55 @@ public class LocalCache implements ProxyServer
 		sendQueue.push(new Packet(Packet.Type.QUIT, null));
 	}
 	
-	private void update() {
+	private void update() throws SQLException {
 	/***************** TODO *******************
-	 * 1. Update cache
-	 * 2. Open thread process received packet
-	 * 3. Monitor client socket
+	 * 1. Update cache                        *
+	 * 2. Open thread process received packet *
+	 * 3. Monitor client socket               *
 	 ******************************************/
+		Message message = new Message();
+		
+		ResultSet resultSet = stmt.executeQuery(
+			"SELECT MAX(MessageID) " +
+			"FROM " + messageTable);
+		resultSet.next();
+		message.msgID = resultSet.getInt("MessageID");
+		
+		resultSet = stmt.executeQuery(
+			"SELECT FriendID " +
+			"FROM " + friendTable);
+		while (resultSet.next()) {
+			message.content += resultSet.getInt("FriendID") + " ";
+		}
+		
+		sendQueue.push(new Packet(Packet.Type.UPDATE, message));
+		
+		new Thread(new Runnable() {
+			public void run() {
+				Packet recv_packet = null;
+				try {
+					while (true) {
+						recv_packet = recvQueue.pop();
+						
+						switch (recv_packet.type) {
+							case MESSAGE:
+								recvMessage(recv_packet.message);
+								break;
+							case ADD_FRIEND:
+								newFriend(recv_packet.message);
+								break;
+							case QUIT:
+								throw new SQLException("Disconnected from server");
+							default:
+								throw new SQLException("Unknown packet: receive " + recv_packet.type + "message");
+						}
+					}
+				} catch (SQLException e) {
+					GUI.setErrorMessage(e.getMessage());
+					GUI.getOffline();
+				}
+			}
+		}).start();
 	}
 	
 	private void recvMessage(Message message) throws SQLException {

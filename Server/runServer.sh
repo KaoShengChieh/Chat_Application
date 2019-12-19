@@ -6,6 +6,6 @@ rm *.class
 
 set -e
 
-javac -cp .:lib:lib/* Server.java -d .
+javac -cp .:lib:lib/* Server.java -Xlint -d .
 
 java -cp .:lib:lib/* Server

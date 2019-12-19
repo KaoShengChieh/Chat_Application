@@ -6,6 +6,6 @@ rm *.class
 
 set -e
 
-javac -cp .:lib:lib/* Client.java -d .
+javac -cp .:lib:lib/* GUI.java -Xlint -d .
 
-java -cp .:lib:lib/* Client
+java -cp .:lib:lib/* GUI

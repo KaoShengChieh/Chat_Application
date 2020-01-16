@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 
 public class Client {
 	private static final String protocol = "jdbc:sqlite:";
-	private static final String filepath = "../data/";
+	private static final String filepath = "./data/";
 	private static final String database = "database";
 	private static final String userTable = "User";
 	private static final String friendTable = "Friend";
@@ -88,9 +88,9 @@ public class Client {
 				
 				if (isLoggedIn == false) {
 					if (recv_packet.type != Packet.Type.SIGN_UP
-						|| recv_packet.type != Packet.Type.LOG_IN)
+						&& recv_packet.type != Packet.Type.LOG_IN)
 					 	continue;
-					
+
 					if (recv_packet.type == Packet.Type.SIGN_UP) {
 						signUp(recv_packet.message);
 						continue;
@@ -207,10 +207,10 @@ public class Client {
 	
 	private void logIn(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
-		
+
 		String userInfo = send_msg.content;
-		String userName = userInfo.substring(0, userInfo.length()-16);
-		String password = userInfo.substring(userInfo.length()-16);
+		String userName = userInfo.substring(0, userInfo.length()-32);
+		String password = userInfo.substring(userInfo.length()-32);
 		
 		try {
 			ResultSet resultSet = stmt.executeQuery(

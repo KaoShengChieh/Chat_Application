@@ -1,4 +1,4 @@
-public class Packet implements java.io.Serializable {
+public class Packet implements java.io.Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
 		
 	public enum Type {
@@ -10,5 +10,15 @@ public class Packet implements java.io.Serializable {
 	Packet(Type type, Message message) {
 		this.type = type;
 		this.message = message;
+	}
+	
+	public Packet clone() {
+		try {
+			Packet pktCopy = (Packet)super.clone();
+			pktCopy.message = message.clone();
+			return pktCopy;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
 	}
 }

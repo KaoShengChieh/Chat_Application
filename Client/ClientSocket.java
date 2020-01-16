@@ -92,6 +92,7 @@ public class ClientSocket
 					try {
 						while (true) { 
 							recv_packet = readSocket();
+							System.err.println(recv_packet.type.toString());
 							setPacket(recv_packet);
 						}
 					} catch (IOException e) { 

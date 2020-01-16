@@ -10,7 +10,7 @@ public class Message implements java.io.Serializable, Cloneable {
 	public Message clone() {
 		try {
 			Message msgCopy = (Message)super.clone();
-			msgCopy.content = null; // For security concern
+			//msgCopy.content = null; // For security concern
 			return msgCopy;
 		} catch (CloneNotSupportedException e) {
 			return null;

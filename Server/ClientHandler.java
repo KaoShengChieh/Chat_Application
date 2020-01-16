@@ -26,8 +26,6 @@ public class ClientHandler implements Runnable {
 
 	public void run() {
 		try {
-			client.start();
-			
 			new Thread(new Runnable() { 
 				public void run() { 
 					Packet recv_packet = null;
@@ -60,6 +58,8 @@ public class ClientHandler implements Runnable {
 		            }
 				}
 			}).start();
+			
+			client.start();
 			
 			synchronized (client) {
 				while (client.isQuit() == false) {

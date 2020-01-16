@@ -32,6 +32,7 @@ public class ClientHandler implements Runnable {
 					try {
 						while (true) { 
 							recv_packet = readSocket();
+							printPacket(recv_packet, "recv from client");
 							setPacket(recv_packet);
 						}
 					} catch (IOException e) { 
@@ -50,6 +51,7 @@ public class ClientHandler implements Runnable {
 					try {
 						do {
 							send_packet = getPacket();
+							printPacket(send_packet, "send from server");
 							writeSocket(send_packet);
 						} while (send_packet.type != Packet.Type.QUIT);
 					} catch (IOException e) { 
@@ -117,5 +119,17 @@ public class ClientHandler implements Runnable {
 	private void close(String errMessage) {
 		System.err.println(errMessage);
 		close();
+	}
+	
+	private void printPacket(Packet packet, String assistMessage) {
+		Message message = packet.message;
+		
+		System.err.println("----------" + assistMessage + "----------");
+		System.err.println("[type] " + packet.type.toString());
+		System.err.println("[msgID] " + message.msgID);
+		System.err.println("[senderID] " + message.senderID);
+		System.err.println("[receiverID] " + message.receiverID);
+		System.err.println("[timestamp] " + message.timestamp);
+		System.err.println("[content] " + message.content);
 	}
 }

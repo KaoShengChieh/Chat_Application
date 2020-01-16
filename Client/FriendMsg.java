@@ -39,6 +39,7 @@ public class FriendMsg extends JFrame {
 	private JPanel contentPane;
 	private JTextField textField;
 	private JPasswordField passwordField;
+	private ProxyServer localCache;
 	
 	int xx,xy;
 
@@ -86,13 +87,13 @@ public class FriendMsg extends JFrame {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				AddFriend addFriend = new AddFriend();
+				AddFriend addFriend = new AddFriend(localCache);
 				addFriend.setVisible(true);
 				setVisible(false);
 				dispose();
 			}
 		});
-		lblAddfriend.setIcon(new ImageIcon(ClientMain.class.getResource("/userAdd.png")));
+		lblAddfriend.setIcon(new ImageIcon(ClientMain.class.getResource("image/userAdd.png")));
 		lblAddfriend.setBounds(0, 112, 48, 71);
 		panel.add(lblAddfriend);
 		lblAddfriend.setHorizontalAlignment(SwingConstants.CENTER);
@@ -100,13 +101,13 @@ public class FriendMsg extends JFrame {
 		lblAddfriend.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		
 		JLabel lblLogout = new JLabel("");
-		lblLogout.setIcon(new ImageIcon(FriendMsg.class.getResource("/logout.png")));
+		lblLogout.setIcon(new ImageIcon(FriendMsg.class.getResource("image/logout.png")));
 		lblLogout.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
-					Login login = new Login();
+					Login login = new Login(localCache);
 					login.setVisible(true);
 					setVisible(false);
 					dispose();
@@ -120,11 +121,11 @@ public class FriendMsg extends JFrame {
 		panel.add(lblLogout);
 		
 		JLabel lblMsg = new JLabel("");
-		lblMsg.setIcon(new ImageIcon(FriendMsg.class.getResource("/user.png")));
+		lblMsg.setIcon(new ImageIcon(FriendMsg.class.getResource("image/user.png")));
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ClientMain clientMain = new ClientMain();
+				ClientMain clientMain = new ClientMain(localCache);
 				clientMain.setVisible(true);
 				setVisible(false);
 				dispose();
@@ -139,7 +140,7 @@ public class FriendMsg extends JFrame {
 		JLabel lblClose = new JLabel("");
 		lblClose.setBounds(0, 6, 48, 71);
 		panel.add(lblClose);
-		lblClose.setIcon(new ImageIcon(FriendMsg.class.getResource("/clientX.png")));
+		lblClose.setIcon(new ImageIcon(FriendMsg.class.getResource("image/clientX.png")));
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

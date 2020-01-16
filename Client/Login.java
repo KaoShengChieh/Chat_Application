@@ -53,9 +53,24 @@ public class Login extends JFrame implements View {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Login frame = new Login();
+					ProxyServer localCache = new LocalCache();
+					Login frame = new Login(localCache);
+					localCache.getOnline();
+					
 					frame.setUndecorated(true);
 					frame.setVisible(true);
+					
+					try {
+						if (localCache.autoLogIn()) {
+							ClientMain main = new ClientMain(localCache);
+							main.setVisible(true);
+							frame.setVisible(false);
+							frame.dispose();
+							return;
+						}
+					} catch (SQLException e) {
+						frame.setErrorMessage(e.getMessage());
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -70,7 +85,7 @@ public class Login extends JFrame implements View {
 	/**
 	 * Create the frame.
 	 */
-	public Login() {
+	public Login(ProxyServer localCache) {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 729, 476);
@@ -80,8 +95,8 @@ public class Login extends JFrame implements View {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		localCache = new LocalCache(this);
-		localCache.getOnline();
+		this.localCache = localCache;
+		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 0, 51));
@@ -130,7 +145,7 @@ public class Login extends JFrame implements View {
 		Button btnRegister = new Button("Register");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Register register = new Register();
+				Register register = new Register(localCache);
 				register.setVisible(true);
 				setVisible(false);
 				dispose();
@@ -185,27 +200,29 @@ public class Login extends JFrame implements View {
 			public void actionPerformed(ActionEvent e) {
 				String username = textField.getText().toString();
 				String password = String.valueOf(passwordField.getPassword());
+				boolean logInSuccessful = false;
+				
 				try {
-					localCache.logIn(username, password, true);
+					logInSuccessful = localCache.logIn(username, password, autoLogin);
 				} catch (SQLException exception) {
-					System.out.println(exception.getMessage());
+					setErrorMessage(exception.getMessage());
 				}
-				ClientMain main = new ClientMain();
-				main.setVisible(true);
-				setVisible(false);
-				dispose();
+				
+				if (logInSuccessful) {
+					ClientMain main = new ClientMain(localCache);
+					main.setVisible(true);
+					setVisible(false);
+					dispose();
+				}
 			}
 		});
 		
-		
-
-			
 		btnLogin.setForeground(new Color(51, 255, 102));
 		btnLogin.setBackground(new Color(51, 255, 102));
 		btnLogin.setBounds(395, 341, 131, 36);
 		contentPane.add(btnLogin);
 		
-		chckbxAutologin = new JCheckBox("Keep me signed in");
+		chckbxAutologin = new JCheckBox("Keep log in");
 		chckbxAutologin.setBounds(466, 394, 195, 23);
 		contentPane.add(chckbxAutologin);
 		
@@ -217,16 +234,13 @@ public class Login extends JFrame implements View {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			// TODO Auto-generated method stub
-			if (chckbxAutologin.isSelected()) {
-				int action = JOptionPane.showConfirmDialog(null, "Keep me Logged in all the time?", "Warning", JOptionPane.YES_NO_OPTION);
-				if(action != 0) {
-					chckbxAutologin.setSelected(false);
-				}
-			}
+			autoLogin = chckbxAutologin.isSelected();
 		}
 	}	
 	public void getOffline(){}
 	public void newMessage(Message message){}
 	public void newFriend(User friend){}
-	public void setErrorMessage(String message){}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
+	}
 }

@@ -31,14 +31,16 @@ import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import java.sql.SQLException;
 
-public class ClientMain extends JFrame {
+public class ClientMain extends JFrame implements View {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private ProxyServer localCache;
 	String Name = "Ricky";
 	String Password = "123456";
 	
@@ -46,7 +48,7 @@ public class ClientMain extends JFrame {
 
 	/**
 	 * Launch the application.
-	 */
+	 */ /*
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -59,7 +61,7 @@ public class ClientMain extends JFrame {
 				}
 			}
 		});
-	}
+	}*/
 	
 	
 	// going to borrow code from a gist to move frame.
@@ -69,7 +71,7 @@ public class ClientMain extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ClientMain() {
+	public ClientMain(ProxyServer localCache) {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 406, 476);
@@ -78,6 +80,9 @@ public class ClientMain extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		
+		this.localCache = localCache;
+		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 102, 204));
@@ -89,13 +94,13 @@ public class ClientMain extends JFrame {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				AddFriend addFriend = new AddFriend();
+				AddFriend addFriend = new AddFriend(localCache);
 				addFriend.setVisible(true);
 				setVisible(false);
 				dispose();
 			}
 		});
-		lblAddfriend.setIcon(new ImageIcon(ClientMain.class.getResource("/userAdd.png")));
+		lblAddfriend.setIcon(new ImageIcon(ClientMain.class.getResource("image/userAdd.png")));
 		lblAddfriend.setBounds(0, 112, 48, 71);
 		panel.add(lblAddfriend);
 		lblAddfriend.setHorizontalAlignment(SwingConstants.CENTER);
@@ -103,16 +108,21 @@ public class ClientMain extends JFrame {
 		lblAddfriend.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		
 		JLabel lblLogout = new JLabel("");
-		lblLogout.setIcon(new ImageIcon(ClientMain.class.getResource("/logout.png")));
+		lblLogout.setIcon(new ImageIcon(ClientMain.class.getResource("image/logout.png")));
 		lblLogout.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
-					Login login = new Login();
-					login.setVisible(true);
-					setVisible(false);
-					dispose();
+					try {
+						localCache.logOut();
+						Login login = new Login(localCache);
+						login.setVisible(true);
+						setVisible(false);
+						dispose();
+					} catch (SQLException e) {
+						setErrorMessage(e.getMessage());
+					}
 				}
 			}
 		});
@@ -123,7 +133,7 @@ public class ClientMain extends JFrame {
 		panel.add(lblLogout);
 		
 		JLabel lblMsg = new JLabel("");
-		lblMsg.setIcon(new ImageIcon(ClientMain.class.getResource("/message.png")));
+		lblMsg.setIcon(new ImageIcon(ClientMain.class.getResource("image/message.png")));
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -142,7 +152,7 @@ public class ClientMain extends JFrame {
 		JLabel lblClose = new JLabel("");
 		lblClose.setBounds(0, 6, 48, 71);
 		panel.add(lblClose);
-		lblClose.setIcon(new ImageIcon(ClientMain.class.getResource("/clientX.png")));
+		lblClose.setIcon(new ImageIcon(ClientMain.class.getResource("image/clientX.png")));
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -240,7 +250,12 @@ public class ClientMain extends JFrame {
 				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
 		);
 		testPanel.setLayout(gl_FriendsJPanel);
-		
-		
+	}
+	
+	public void getOffline(){}
+	public void newMessage(Message message){}
+	public void newFriend(User friend){}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}
 }

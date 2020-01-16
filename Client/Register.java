@@ -23,7 +23,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 
-public class Register extends JFrame {
+public class Register extends JFrame implements View {
 
 	/**
 	 * 
@@ -32,12 +32,13 @@ public class Register extends JFrame {
 	private JTextField textField;
 	private JPasswordField passwordField;
 	private JPasswordField passwordField_1;
+	private ProxyServer localCache;
 	
 	int xx,xy;
 
 	/**
 	 * Launch the application.
-	 */
+	 */ /*
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -50,7 +51,7 @@ public class Register extends JFrame {
 				}
 			}
 		});
-	}
+	}*/
 	
 	
 	// going to borrow code from a gist to move frame.
@@ -59,7 +60,7 @@ public class Register extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Register() {
+	public Register(ProxyServer localCache) {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 729, 476);
@@ -68,6 +69,9 @@ public class Register extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		
+		this.localCache = localCache;
+		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(153, 0, 51));
@@ -103,7 +107,7 @@ public class Register extends JFrame {
 		});
 		lblImg.setBounds(-38, 0, 420, 275);
 		lblImg.setVerticalAlignment(SwingConstants.TOP);
-		lblImg.setIcon(new ImageIcon(Register.class.getResource("/friends2.png")));
+		lblImg.setIcon(new ImageIcon(Register.class.getResource("image/friends2.png")));
 		panel.add(lblImg);
 		
 		JLabel lblViseTitle = new JLabel("...Enjoy Online Chatting...");
@@ -119,13 +123,19 @@ public class Register extends JFrame {
 				String username = textField.getText().toString();
 				String password = String.valueOf(passwordField.getPassword());
 				String passwordConfirm = String.valueOf(passwordField_1.getPassword());
+				boolean signUpSuccessful = false;
+				
 				if (password.equals(passwordConfirm) && !username.equals("")) {
-					JOptionPane.showMessageDialog(null, "Successfully Registered!");
+					signUpSuccessful = localCache.signUp(username, password);
+					
+					if (signUpSuccessful) {
+						JOptionPane.showMessageDialog(null, "Successfully Registered!");
 
-					Login login = new Login();
-					login.setVisible(true);
-					setVisible(false);
-					dispose();
+						Login login = new Login(localCache);
+						login.setVisible(true);
+						setVisible(false);
+						dispose();
+					}
 				}
 				else {
 					JOptionPane.showMessageDialog(null, "Invalid username or password not matched!");
@@ -166,7 +176,7 @@ public class Register extends JFrame {
 		contentPane.add(passwordField_1);
 		
 		JLabel lbl_close = new JLabel("");
-		lbl_close.setIcon(new ImageIcon(Register.class.getResource("/X.png")));
+		lbl_close.setIcon(new ImageIcon(Register.class.getResource("image/X.png")));
 		lbl_close.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -186,5 +196,12 @@ public class Register extends JFrame {
 		lblRegister.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRegister.setBounds(395, 23, 283, 71);
 		contentPane.add(lblRegister);
+	}
+	
+	public void getOffline(){}
+	public void newMessage(Message message){}
+	public void newFriend(User friend){}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}
 }

@@ -28,8 +28,7 @@ public class LocalCache implements ProxyServer
 	private ClientSocket clientSocket;
 	private int userID;
 	
-	public LocalCache(View GUI) {
-		this.GUI = GUI;
+	public LocalCache() {
 		this.connectDatabase();
 		
 		sendQueue = new BlockingQueue<>();
@@ -83,6 +82,8 @@ public class LocalCache implements ProxyServer
 			sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
 			Packet recv_packet = recvQueue.pop();
 			userID = recv_packet.message.senderID;
+			
+			this.update();
 			
 			return userID != -1 ? true : false;
 		}
@@ -262,6 +263,10 @@ public class LocalCache implements ProxyServer
 		sendQueue.push(new Packet(Packet.Type.QUIT, null));
 	}
 	
+	public void changeView(View view) { 
+		this.GUI = view;
+	}
+	
 	private void update() throws SQLException {
 	/***************** TODO *******************
 	 * 1. Update cache                        *
@@ -271,9 +276,12 @@ public class LocalCache implements ProxyServer
 		Message message = new Message();
 		
 		ResultSet resultSet = stmt.executeQuery(
-			"SELECT MAX(MessageID) " +
+			"SELECT MAX(MessageID), MessageID " +
 			"FROM " + messageTable);
-		resultSet.next();
+			
+		if (resultSet.next() == false)
+			return;
+		
 		message.msgID = resultSet.getInt("MessageID");
 		
 		resultSet = stmt.executeQuery(
@@ -302,7 +310,7 @@ public class LocalCache implements ProxyServer
 							case QUIT:
 								throw new SQLException("Disconnected from server");
 							default:
-								throw new SQLException("Unknown packet: receive " + recv_packet.type + "message");
+								throw new SQLException("Unknown packet: receive " + recv_packet.type + " message");
 						}
 					}
 				} catch (SQLException e) {

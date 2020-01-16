@@ -16,8 +16,8 @@ public class Client {
 	private static final String friendTable = "Friend";
 	private static final String messageTable = "Message";
 	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT)";
-	private static final String friendFields = "(FrinedAID INTEGER, FriendBID INTEGER, PRIMARY KEY (FriendAID, FriendBID))";
-	private static final String messageFields = "(MsgID INTEGER AUTOINCREMENT PRIMARY KEY, senderID INTEGER, receiverID INTEGER, Timestamp DATETIME, Content TEXT)";
+	private static final String friendFields = "(FriendAID INTEGER, FriendBID INTEGER, PRIMARY KEY (FriendAID, FriendBID))";
+	private static final String messageFields = "(MsgID INTEGER PRIMARY KEY AUTOINCREMENT, senderID INTEGER, receiverID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
 	private Statement stmt;
 	private BlockingQueue<Packet> sendQueue;
@@ -37,30 +37,27 @@ public class Client {
 		
 		try {
 			stmt = conn.createStatement();
-			if (conn.getMetaData().getTables(null, null, userTable, null).next()) {
-				return;
+			if (conn.getMetaData().getTables(null, null, userTable, null).next() == false) {
+				stmt.execute("CREATE TABLE " + userTable + userFields);
 			}
-			stmt.execute("CREATE TABLE " + userTable + userFields);
 		} catch (SQLException e) {
 			System.err.println("Fail to fetch " + userTable + " Information: " + e.getMessage());
 			System.exit(0);
 		}
 		
 		try {
-			if (conn.getMetaData().getTables(null, null, friendTable, null).next()) {
-				return;
+			if (conn.getMetaData().getTables(null, null, friendTable, null).next() == false) {
+				stmt.execute("CREATE TABLE " + friendTable + friendFields);
 			}
-			stmt.execute("CREATE TABLE " + friendTable + friendFields);
-			} catch (SQLException e) {
+		} catch (SQLException e) {
 			System.err.println("Fail to fetch " + friendTable + " Information: " + e.getMessage());
 			System.exit(0);
 		}
 		
 		try {
-			if (conn.getMetaData().getTables(null, null, messageTable, null).next()) {
-				return;
+			if (conn.getMetaData().getTables(null, null, messageTable, null).next() == false) {
+				stmt.execute("CREATE TABLE " + messageTable + messageFields);
 			}
-			stmt.execute("CREATE TABLE " + messageTable + messageFields);
 		} catch (SQLException e) {
 			System.err.println("Fail to fetch " + messageTable + " Information: " + e.getMessage());
 			System.exit(0);
@@ -110,10 +107,8 @@ public class Client {
 				
 				if (recv_packet.type == Packet.Type.UPDATE) {
 					update(recv_packet.message);
-				} else {
-					continue;
 				}
-					
+					int i = 0;
 				itr = clientList.listIterator();
 				switch (recv_packet.type) {
 					case ADD_FRIEND:
@@ -124,6 +119,8 @@ public class Client {
 								|| other.client.userID == recv_packet.message.senderID) {
 								other.client.addFriendNotice(send_msg);
 							}
+												
+							System.err.println(i++);
 						}
 						break;
 					case MESSAGE:
@@ -177,17 +174,18 @@ public class Client {
 	
 	private void signUp(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
+		send_msg.content = null;
 		
-		String userInfo = send_msg.content;
-		String userName = userInfo.substring(0, userInfo.length()-16);
-		String password = userInfo.substring(userInfo.length()-16);
+		String userInfo = recv_msg.content;
+		String userName = userInfo.substring(0, userInfo.length()-32);
+		String password = userInfo.substring(userInfo.length()-32);
 		
 		try {
 			ResultSet resultSet = stmt.executeQuery(
 				"SELECT * " +
 				"FROM " + userTable + " " +
 				"WHERE UserName = '" + userName + "'");
-			
+				
 			if (resultSet.next() == true) {
 				send_msg.senderID = -1;
 				send_msg.content = "Username has been used";
@@ -224,7 +222,7 @@ public class Client {
 				userID = send_msg.senderID;
 			} else {
 				send_msg.senderID = -1;
-				send_msg.content = "Username or passwrod is incorrect";
+				send_msg.content = "Username or password is incorrect";
 			}
 		} catch (SQLException e) {
 			send_msg.content = "Unable to log in: " + e.getMessage();
@@ -236,17 +234,15 @@ public class Client {
 	private void update(Message recv_msg) {
 		try {
 			ResultSet resultSet = stmt.executeQuery(
-				"SELECT UserID AS FriendID, UserName AS FriendName" +
+				"SELECT UserID AS FriendID, UserName AS FriendName " +
 				"FROM " + friendTable + ", " + userTable + " " +
 				"WHERE (FriendAID = " + userID + " " +
-					"AND UserID = FriendBID)"+
+					"AND UserID = FriendBID) "+
 				"OR (FriendBID = " + userID + " " +
 					"AND UserID = FriendAID)");
 			
-			StringTokenizer tokens = new StringTokenizer(recv_msg.content, "/");
-			int tokenCount = tokens.countTokens();
-			
-			if (tokenCount != 0) {
+			if (recv_msg.content != null) {
+				StringTokenizer tokens = new StringTokenizer(recv_msg.content, "/");
 				List<Integer> friendList = new ArrayList<>();
 				
 				while (tokens.hasMoreTokens()) {
@@ -265,18 +261,17 @@ public class Client {
 					send_msg.content = resultSet.getString("FriendName");
 					sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 				}
-			} else {
+			} else if (resultSet.next()) {
 				Message send_msg = new Message();
 				send_msg.senderID = userID;
 				send_msg.receiverID = resultSet.getInt("FriendID");
 				send_msg.content = resultSet.getString("FriendName");
 				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 			}
-			
 			resultSet = stmt.executeQuery(
 				"SELECT * " +
 				"FROM " + messageTable + " " +
-				"WHERE SenderID = " + userID + " " +
+				"WHERE (SenderID = " + userID + " " +
 				"OR ReceiverID = " + userID + ") " +
 				"AND MsgID > " + recv_msg.msgID);
 			
@@ -312,17 +307,15 @@ public class Client {
 				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 				return null;
 			}
-			
-			resultSet.next();
-			friendID = resultSet.getInt("FriendID");
+			friendID = resultSet.getInt("UserID");
 			
 			stmt.execute(
 				"INSERT INTO " + friendTable + " " +
 				"VALUES (" + send_msg.senderID + ", " + friendID + ")");
-			
+
 			send_msg.receiverID = friendID;
 			send_msg.content = recv_msg.content;
-			
+
 			return send_msg;
 		} catch (SQLException e) {
 			send_msg.receiverID = -1;

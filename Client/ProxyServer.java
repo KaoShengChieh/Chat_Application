@@ -65,4 +65,7 @@ public interface ProxyServer {
 	 * Call this when app ends.
 	 */
 	void quit();
+	
+	
+	void changeView(View view);
 }

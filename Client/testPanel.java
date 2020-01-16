@@ -20,7 +20,7 @@ public class testPanel extends JPanel {
 		setBackground(new Color(0, 102, 153));
 		setLayout(null);
 		
-		int num = 2;
+		int num = 8;
 		
 		JButton btnFriend[] = new JButton[10];
 		for (int i = 0; i < num; i++) {
@@ -34,7 +34,6 @@ public class testPanel extends JPanel {
 				public void mouseClicked(MouseEvent e) {
 					ChatBox chatbox = new ChatBox();
 					chatbox.setVisible(true);
-					//JOptionPane.showMessageDialog(chatbox, "hello");
 				}
 			});
 		}

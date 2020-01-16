@@ -11,6 +11,7 @@ import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
@@ -115,10 +116,23 @@ public class Register extends JFrame {
 		Button button = new Button("Register Complete. Login!");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Login login = new Login();
-				login.setVisible(true);
-				setVisible(false);
-				dispose();
+				String username = textField.getText().toString();
+				String password = String.valueOf(passwordField.getPassword());
+				String passwordConfirm = String.valueOf(passwordField_1.getPassword());
+				if (password.equals(passwordConfirm) && !username.equals("")) {
+					JOptionPane.showMessageDialog(null, "Successfully Registered!");
+
+					Login login = new Login();
+					login.setVisible(true);
+					setVisible(false);
+					dispose();
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Invalid username or password not matched!");
+					textField.setText("");
+					passwordField.setText("");
+					passwordField_1.setText("");
+				}
 			}
 		});
 		button.setForeground(new Color(255, 0, 102));

@@ -32,11 +32,9 @@ public class AddFriend extends JFrame {
 	 */
 	//private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
-	private JPasswordField passwordField;
 	
 	int xx,xy;
-	private JTextField textField_1;
+	private JTextField SearchFriend;
 
 	/**
 	 * Launch the application.
@@ -191,21 +189,28 @@ public class AddFriend extends JFrame {
 		lblSearch.setBounds(98, 143, 96, 14);
 		contentPane.add(lblSearch);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(88, 169, 283, 36);
-		contentPane.add(textField_1);
+		SearchFriend = new JTextField();
+		SearchFriend.setColumns(10);
+		SearchFriend.setBounds(88, 169, 283, 36);
+		contentPane.add(SearchFriend);
 		
 		Button button = new Button("Search");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				//if exist
-				int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
-				if (action == 0) {
-					JOptionPane.showMessageDialog(null, "Say Hi to your new friend!");
+				String username = SearchFriend.getText().toString();
+				//check if username exist
+				boolean exist = false;
+				if (exist) {
+					int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
+					if (action == 0) {
+						JOptionPane.showMessageDialog(null, "Say Hi to your new friend!");
+					}
+					SearchFriend.setText("");
 				}
-				//doesn't exist
+				else {
+					JOptionPane.showMessageDialog(null, "No such user!");
+					SearchFriend.setText("");
+				}
 			}
 		});
 		button.setForeground(Color.ORANGE);

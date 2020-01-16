@@ -11,6 +11,7 @@ import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
@@ -19,8 +20,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import java.sql.SQLException;
 
 //https://github.com/YUbuntu0109/Instant-messaging-software---Java-swing/blob/master/Instant%20messaging%20software%20-%20MyQQ/Source/Document.txt
@@ -37,7 +41,8 @@ public class Login extends JFrame implements View {
 	private JTextField textField;
 	private JPasswordField passwordField;
 	private ProxyServer localCache;
-	private View view;
+	private JCheckBox chckbxAutologin;
+	private boolean autoLogin = false;
 	
 	int xx,xy;
 
@@ -75,6 +80,9 @@ public class Login extends JFrame implements View {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		localCache = new LocalCache(this);
+		localCache.getOnline();
+		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 0, 51));
 		panel.setBounds(0, 0, 346, 490);
@@ -109,7 +117,7 @@ public class Login extends JFrame implements View {
 		});
 		lblImg.setBounds(-97, -2, 552, 281);
 		lblImg.setVerticalAlignment(SwingConstants.TOP);
-		lblImg.setIcon(new ImageIcon(Login.class.getResource("Image/chat3.png")));
+		lblImg.setIcon(new ImageIcon(Login.class.getResource("image/chat3.png")));
 		panel.add(lblImg);
 		
 		JLabel lblViseTitle = new JLabel("...Enjoy Online Chatting...");
@@ -151,7 +159,7 @@ public class Login extends JFrame implements View {
 		contentPane.add(passwordField);
 		
 		JLabel lbl_close = new JLabel("");
-		lbl_close.setIcon(new ImageIcon(Login.class.getResource("Image/X.png")));
+		lbl_close.setIcon(new ImageIcon(Login.class.getResource("image/X.png")));
 		lbl_close.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -172,10 +180,6 @@ public class Login extends JFrame implements View {
 		lblLogin.setBounds(395, 23, 283, 71);
 		contentPane.add(lblLogin);
 		
-		localCache = new LocalCache(this);
-		localCache.getOnline();
-		
-		
 		Button btnLogin = new Button("Login");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -192,12 +196,35 @@ public class Login extends JFrame implements View {
 				dispose();
 			}
 		});
+		
+		
+
+			
 		btnLogin.setForeground(new Color(51, 255, 102));
 		btnLogin.setBackground(new Color(51, 255, 102));
 		btnLogin.setBounds(395, 341, 131, 36);
 		contentPane.add(btnLogin);
+		
+		chckbxAutologin = new JCheckBox("Keep me signed in");
+		chckbxAutologin.setBounds(466, 394, 195, 23);
+		contentPane.add(chckbxAutologin);
+		
+		Checked check = new Checked();
+		chckbxAutologin.addItemListener(check);
 	}
+	public class Checked implements ItemListener {
 	
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			// TODO Auto-generated method stub
+			if (chckbxAutologin.isSelected()) {
+				int action = JOptionPane.showConfirmDialog(null, "Keep me Logged in all the time?", "Warning", JOptionPane.YES_NO_OPTION);
+				if(action != 0) {
+					chckbxAutologin.setSelected(false);
+				}
+			}
+		}
+	}	
 	public void getOffline(){}
 	public void newMessage(Message message){}
 	public void newFriend(User friend){}

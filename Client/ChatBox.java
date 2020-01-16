@@ -66,7 +66,7 @@ public class ChatBox extends JFrame {
 	public ChatBox() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 729, 476);
+		setBounds(100, 100, 729, 500);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -148,7 +148,7 @@ public class ChatBox extends JFrame {
 			}
 		});
 		
-		InitChat();
+		//InitChat();
 	}
 	public void InitChat() {
 		int port;

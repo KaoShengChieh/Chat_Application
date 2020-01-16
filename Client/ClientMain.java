@@ -39,8 +39,8 @@ public class ClientMain extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
-	private JPasswordField passwordField;
+	String Name = "Ricky";
+	String Password = "123456";
 	
 	int xx,xy;
 
@@ -203,6 +203,23 @@ public class ClientMain extends JFrame {
 		JPanel InfoJPanel = new JPanel();
 		InfoJPanel.setBackground(Color.WHITE);
 		tabbedPane.addTab("Profile", null, InfoJPanel, null);
+		
+		Name = "Rickyyyy";
+		Password = "123456";
+		
+		JLabel myName = new JLabel("My Name: " + Name);
+		myName.setHorizontalAlignment(SwingConstants.CENTER);
+		myName.setForeground(Color.RED);
+		myName.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 30));
+		myName.setBackground(new Color(0, 102, 204));
+		InfoJPanel.add(myName);
+		
+		JLabel myPassword = new JLabel("Password: " + Password);
+		myPassword.setHorizontalAlignment(SwingConstants.CENTER);
+		myPassword.setForeground(Color.ORANGE);
+		myPassword.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 30));
+		myPassword.setBackground(new Color(0, 102, 204));
+		InfoJPanel.add(myPassword);
 		
 		JPanel testPanel = new JPanel();
 		testPanel.setBackground(Color.WHITE);

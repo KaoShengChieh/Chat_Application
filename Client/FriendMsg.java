@@ -197,31 +197,27 @@ public class FriendMsg extends JFrame {
 		tabbedPane.setBounds(60, 107, 327, 359);
 		contentPane.add(tabbedPane);
 		
-		JPanel testPanel = new JPanel();
-		testPanel.setBackground(Color.WHITE);
-		tabbedPane.addTab("Chats", null, testPanel, null);
+		testPanel myPanel = new testPanel();
+		
 		
 		JScrollPane FriendScrollPane = new JScrollPane();
-		testPanel.add(FriendScrollPane);
+		FriendScrollPane.setBounds(100, 100, 100, 100);
+		myPanel.add(FriendScrollPane);
 		
 		testPanel friendsJPanel = new testPanel();
-//		friendsJPanel.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				ChatBox chatbox = new ChatBox();
-//				chatbox.setVisible(true);
-//			}
-//		});
 		FriendScrollPane.setViewportView(friendsJPanel);	
-		GroupLayout gl_FriendsJPanel = new GroupLayout(testPanel);
-		gl_FriendsJPanel.setHorizontalGroup(
-			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
-				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-		);
-		gl_FriendsJPanel.setVerticalGroup(
-			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
-				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
-		);
-		testPanel.setLayout(gl_FriendsJPanel);
+		
+//		GroupLayout gl_FriendsJPanel = new GroupLayout(myPanel);
+//		gl_FriendsJPanel.setHorizontalGroup(
+//			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
+//				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+//		);
+//		gl_FriendsJPanel.setVerticalGroup(
+//			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
+//				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+//		);
+//		myPanel.setLayout(gl_FriendsJPanel);
+		
+		tabbedPane.addTab("Chats", null, myPanel, null);
 	}
 }

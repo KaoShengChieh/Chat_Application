@@ -30,7 +30,7 @@ import javax.swing.JList;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
-public class FriendMsg extends JFrame {
+public class FriendMsg extends JFrame implements View{
 
 	/**
 	 * 
@@ -50,7 +50,8 @@ public class FriendMsg extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					FriendMsg frame = new FriendMsg();
+					ProxyServer localCache = new LocalCache();
+					FriendMsg frame = new FriendMsg(localCache);
 					frame.setUndecorated(true);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -67,7 +68,7 @@ public class FriendMsg extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public FriendMsg() {
+	public FriendMsg(ProxyServer localCache) {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 406, 476);
@@ -76,6 +77,9 @@ public class FriendMsg extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
+		
+		this.localCache = localCache;
+		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 102, 204));
@@ -198,27 +202,32 @@ public class FriendMsg extends JFrame {
 		tabbedPane.setBounds(60, 107, 327, 359);
 		contentPane.add(tabbedPane);
 		
-		testPanel myPanel = new testPanel();
+		JPanel FriendsListJPanel = new JPanel();
+		FriendsListJPanel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Chats", null, FriendsListJPanel, null);
 		
 		
 		JScrollPane FriendScrollPane = new JScrollPane();
-		FriendScrollPane.setBounds(100, 100, 100, 100);
-		myPanel.add(FriendScrollPane);
+		//FriendsJPanel.add(FriendScrollPane);
 		
-		testPanel friendsJPanel = new testPanel();
-		FriendScrollPane.setViewportView(friendsJPanel);	
+		testPanel friendsJPanel = new testPanel(localCache);
+		FriendScrollPane.setViewportView(friendsJPanel);
 		
-//		GroupLayout gl_FriendsJPanel = new GroupLayout(myPanel);
-//		gl_FriendsJPanel.setHorizontalGroup(
-//			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
-//				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-//		);
-//		gl_FriendsJPanel.setVerticalGroup(
-//			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
-//				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
-//		);
-//		myPanel.setLayout(gl_FriendsJPanel);
-		
-		tabbedPane.addTab("Chats", null, myPanel, null);
+		GroupLayout gl_FriendsJPanel = new GroupLayout(FriendsListJPanel);
+		gl_FriendsJPanel.setHorizontalGroup(
+			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
+				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+		);
+		gl_FriendsJPanel.setVerticalGroup(
+			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
+				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
+		);
+		FriendsListJPanel.setLayout(gl_FriendsJPanel);
+	}
+	public void getOffline(){}
+	public void newMessage(Message message){}
+	public void newFriend(User friend){}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}
 }

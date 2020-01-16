@@ -19,6 +19,8 @@ import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.sql.SQLException;
+import java.util.List;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
@@ -26,7 +28,7 @@ import javax.swing.UIManager;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class ChatBox extends JFrame {
+public class ChatBox extends JFrame implements View{
 
 	/**
 	 * 
@@ -36,7 +38,8 @@ public class ChatBox extends JFrame {
 	 * 
 	 */
 	private JPanel contentPane;
-	
+	private ProxyServer localCache;
+	private User friend;
 	private JTextField textFieldSend;
 	private JTextArea textAreaChat;
 
@@ -47,7 +50,10 @@ public class ChatBox extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ChatBox frame = new ChatBox();
+					ProxyServer localCache = new LocalCache();
+					//not sure if it's right
+					User friend = new User(1, "Ricky");
+					ChatBox frame = new ChatBox(localCache, friend);
 					//frame.setUndecorated(true);
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -63,7 +69,11 @@ public class ChatBox extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ChatBox() {
+	public ChatBox(ProxyServer localCache, User friend) {
+		
+		this.localCache = localCache;
+		localCache.changeView(this);
+		
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 729, 500);
@@ -79,7 +89,9 @@ public class ChatBox extends JFrame {
 		contentPane.add(panelFriendInfo);
 		panelFriendInfo.setLayout(null);
 		
-		JLabel lblTitle = new JLabel("Friend Username");
+		String friendName = friend.Name;
+		
+		JLabel lblTitle = new JLabel(friendName);
 		lblTitle.setBackground(UIManager.getColor("Button.darkShadow"));
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Toppan Bunkyu Gothic", Font.PLAIN, 24));
@@ -107,7 +119,7 @@ public class ChatBox extends JFrame {
 		JLabel lblSend = new JLabel("");
 		lblSend.setBounds(666, 6, 61, 65);
 		panelSend.add(lblSend);
-		lblSend.setIcon(new ImageIcon(ChatBox.class.getResource("/send.png")));
+		lblSend.setIcon(new ImageIcon(ChatBox.class.getResource("image/send.png")));
 		lblSend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -124,7 +136,7 @@ public class ChatBox extends JFrame {
 		lblFile.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblFile.setBounds(0, 6, 61, 65);
 		panelSend.add(lblFile);
-		lblFile.setIcon(new ImageIcon(ChatBox.class.getResource("/paperclip.png")));
+		lblFile.setIcon(new ImageIcon(ChatBox.class.getResource("image/paperclip.png")));
 		lblFile.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -147,47 +159,72 @@ public class ChatBox extends JFrame {
 				
 			}
 		});
-		
-		//InitChat();
+		Function_loadHistory();
 	}
-	public void InitChat() {
-		int port;
-		while(true) {
-			Function_receiveMessage();
+	public void Function_loadHistory()
+	{
+		List<Message> history;
+		//Get the history
+		try {
+			int smallestMessageID = -1;
+			history = localCache.getMsgHistory(friend, smallestMessageID);
+			
+			for (int i = 0; i < history.size(); i++) {
+				String message_i = history.get(i).content;
+				String time_i = history.get(i).timestamp;
+				String from;
+				int ID = history.get(i).senderID;
+				if (ID == friend.ID) {
+					from = friend.Name;
+				}
+				else {
+					from = "Me";
+				}
+				//Add the message to the chat box.
+				textAreaChat.append("(" + time_i + ")" + from + ": \n" + message_i +"\n\n");
+			}
+			//Let the scroll bar to the bottom.
+			textAreaChat.setCaretPosition(textAreaChat.getText().length());
+		} catch (SQLException e) {
+			setErrorMessage(e.getMessage());
+		}
+	}
+	public void Function_SendMessage()
+	{
+		//Get the data you want to send.
+		String sendMessage = textFieldSend.getText().toString();
+		boolean sent = localCache.sendMessage(friend, sendMessage);
+		if (sent) {
+			//Store the data.
+			byte data[] = sendMessage.getBytes();
+			//Display the message to the chat box if you send it to your friend.
+			textAreaChat.append("(" + "time" + ")Me: " + "\n" + sendMessage +"\n\n");
+			//Let the scroll bar to the bottom.
+			textAreaChat.setCaretPosition(textAreaChat.getText().length());
+			//Send the message.
+			textFieldSend.setText("");
+		}
+		else {
+			JOptionPane.showMessageDialog(null, "Failed!");
 		}
 	}
 	
-	public void Function_receiveMessage()
+	public void Function_SendFile()
 	{
-		String recvMsg = null;
+//		String filePath = new FileChooser_JFrame().getFilePath();
+//		//Test
+//		System.out.println(filePath);
+	}
+	public void getOffline(){}
+	public void newMessage(Message message) {
+		String recvMsg = message.content;
 		//Add the message to the chat box.
 		textAreaChat.append("Friend: " + "\n" + recvMsg +"\n\n");
 		//Let the scroll bar to the bottom.
 		textAreaChat.setCaretPosition(textAreaChat.getText().length());
 	}
-	
-	protected void Function_SendMessage()
-	{
-		String friend_IPAdress;
-		String friend_RemotePort;
-		
-		
-		//Get the data you want to send.
-		String sendMessage = textFieldSend.getText().toString();
-		//Store the data.
-		byte data[] = sendMessage.getBytes();
-		//Display the message to the chat box if you send it to your friend.
-		textAreaChat.append("Me: " + "\n" + sendMessage +"\n\n");
-		//Let the scroll bar to the bottom.
-		textAreaChat.setCaretPosition(textAreaChat.getText().length());
-		//Send the message.
-		textFieldSend.setText("");
-	}
-	
-	protected void Function_SendFile()
-	{
-//		String filePath = new FileChooser_JFrame().getFilePath();
-//		//Test
-//		System.out.println(filePath);
+	public void newFriend(User friend){}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}
 }

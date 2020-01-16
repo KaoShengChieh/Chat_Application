@@ -137,7 +137,7 @@ public class ClientMain extends JFrame implements View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				FriendMsg chats = new FriendMsg();
+				FriendMsg chats = new FriendMsg(localCache);
 				chats.setVisible(true);
 				setVisible(false);
 				dispose();
@@ -214,8 +214,10 @@ public class ClientMain extends JFrame implements View {
 		InfoJPanel.setBackground(Color.WHITE);
 		tabbedPane.addTab("Profile", null, InfoJPanel, null);
 		
-		Name = "Rickyyyy";
-		Password = "123456";
+		//get my name and password, need fix
+//		User Me = localCache.getMe();
+		Name = "Me";
+//		Password = "123456";
 		
 		JLabel myName = new JLabel("My Name: " + Name);
 		myName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -231,16 +233,16 @@ public class ClientMain extends JFrame implements View {
 		myPassword.setBackground(new Color(0, 102, 204));
 		InfoJPanel.add(myPassword);
 		
-		JPanel testPanel = new JPanel();
-		testPanel.setBackground(Color.WHITE);
-		tabbedPane.addTab("Friends", null, testPanel, null);
+		JPanel myPanel = new JPanel();
+		myPanel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Friends", null, myPanel, null);
 		
 		JScrollPane FriendScrollPane = new JScrollPane();
-		testPanel.add(FriendScrollPane);
+		myPanel.add(FriendScrollPane);
 		
-		FriendScrollPane.setViewportView(new testPanel());
+		FriendScrollPane.setViewportView(new testPanel(localCache));
 		
-		GroupLayout gl_FriendsJPanel = new GroupLayout(testPanel);
+		GroupLayout gl_FriendsJPanel = new GroupLayout(myPanel);
 		gl_FriendsJPanel.setHorizontalGroup(
 			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
 				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
@@ -249,7 +251,7 @@ public class ClientMain extends JFrame implements View {
 			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
 				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
 		);
-		testPanel.setLayout(gl_FriendsJPanel);
+		myPanel.setLayout(gl_FriendsJPanel);
 	}
 	
 	public void getOffline(){}

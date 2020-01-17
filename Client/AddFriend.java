@@ -128,7 +128,7 @@ public class AddFriend extends JFrame implements View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				FriendMsg chats = new FriendMsg();
+				FriendMsg chats = new FriendMsg(localCache);
 				chats.setVisible(true);
 				setVisible(false);
 				dispose();

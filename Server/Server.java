@@ -26,13 +26,10 @@ public class Server
 			try {
 				ClientHandler newClient = server.accept();
 				
-				Thread connection = new Thread(newClient);
-			
+				new Thread(newClient).start(); 
 				System.out.println("Adding this client to active client list"); 
-
+				
 				server.clientList.add(newClient); 
-
-				connection.start(); 
 			} catch (Exception e) {
 				System.out.println("Connection error");
 				e.printStackTrace();

@@ -18,7 +18,7 @@ public class ClientHandler implements Runnable {
 		this.socket = socket;
 		this.inputObject = inputObject; 
 		this.outputObject = outputObject; 
-		clientList = clientList;
+		this.clientList = clientList;
 		sendQueue = new BlockingQueue<>();
 		recvQueue = new BlockingQueue<>();
 		client = new Client(sendQueue, recvQueue, clientList);
@@ -26,6 +26,8 @@ public class ClientHandler implements Runnable {
 
 	public void run() {
 		try {
+			new Thread(client).start(); 
+			
 			new Thread(new Runnable() { 
 				public void run() { 
 					Packet recv_packet = null;
@@ -60,8 +62,6 @@ public class ClientHandler implements Runnable {
 		            }
 				}
 			}).start();
-			
-			client.start();
 			
 			synchronized (client) {
 				while (client.isQuit() == false) {
@@ -121,10 +121,10 @@ public class ClientHandler implements Runnable {
 		close();
 	}
 	
-	private void printPacket(Packet packet, String assistMessage) {
+	private void printPacket(Packet packet, String assistantMessage) {
 		Message message = packet.message;
 		
-		System.err.println("----------" + assistMessage + "----------");
+		System.err.println("----------" + assistantMessage + "----------");
 		System.err.println("[type] " + packet.type.toString());
 		System.err.println("[msgID] " + message.msgID);
 		System.err.println("[senderID] " + message.senderID);

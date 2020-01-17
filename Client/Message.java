@@ -9,11 +9,14 @@ public class Message implements java.io.Serializable, Cloneable {
 	
 	public Message clone() {
 		try {
-			Message msgCopy = (Message)super.clone();
-			//msgCopy.content = null; // For security concern
-			return msgCopy;
+			return (Message)super.clone();
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+	
+	public void setErrorMessage(String errorMessage) {
+		msgID = -1;
+		content = errorMessage;
 	}
 }

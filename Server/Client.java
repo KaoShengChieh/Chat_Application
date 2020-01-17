@@ -1,5 +1,3 @@
-import java.sql.DriverManager;
-import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,36 +7,25 @@ import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class Client implements Runnable {
-	private static final String protocol = "jdbc:sqlite:";
-	private static final String filepath = "./data/";
-	private static final String database = "database";
 	private static final String userTable = "User";
 	private static final String friendTable = "Friend";
 	private static final String messageTable = "Message";
-	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT)";
-	private static final String friendFields = "(FriendAID INTEGER, FriendBID INTEGER, PRIMARY KEY (FriendAID, FriendBID))";
-	private static final String messageFields = "(MsgID INTEGER PRIMARY KEY AUTOINCREMENT, senderID INTEGER, receiverID INTEGER, Timestamp DATETIME, Content TEXT)";
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet resultSet;
-	
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
+	private ClientHandler clientHandler;
 	private List<ClientHandler> clientList;
+	private Statement stmt;
+	private ResultSet resultSet;
 	private boolean isLoggedIn;
-	private boolean quit;
 	private int userID;
 	
-	public Client(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, List<ClientHandler> clientList) {
+	public Client(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, ClientHandler clientHandler, List<ClientHandler> clientList, Statement stmt) {
 		this.sendQueue = sendQueue;
 		this.recvQueue = recvQueue;
+		this.clientHandler = clientHandler;
 		this.clientList = clientList;
+		this.stmt = stmt;
 		userID = -1;
-		
-		connectDatabase();
-		createTableIfNotExists(userTable, userFields);
-		createTableIfNotExists(friendTable, friendFields);
-		createTableIfNotExists(messageTable, messageFields);
 	}
 	
 	public void run() {
@@ -54,7 +41,7 @@ public class Client implements Runnable {
 					
 				System.out.println("Receive " +
 					recv_packet.type +" request from " +
-					(userID >= 0 ? "unknown user" : "user " + userID));
+					(userID == -1 ? "unknown user" : "user " + userID));
 					
 				if (recv_packet.type == Packet.Type.QUIT) {
 					break;
@@ -122,8 +109,7 @@ public class Client implements Runnable {
 		} catch (Exception e){
 			e.printStackTrace();
 		} finally {
-			this.quit();
-			closeDatabase();
+			clientHandler.close();
 		}
 	}
 	
@@ -131,55 +117,10 @@ public class Client implements Runnable {
 		return userID;
 	}
 	
-	public boolean isQuit() {
-		return quit;
-	}
-	
-	private void connectDatabase() {
-		try {
-			conn = DriverManager.getConnection(protocol + filepath + database);
-		} catch (SQLException e) {
-			System.err.println("Fail to connect database: " + e.getMessage());
-			System.exit(0);
-		}
-	}
-	
-	private void createTableIfNotExists(String tableName, String fields) {
-		try {
-			if (conn.getMetaData().getTables(null, null, tableName, null).next() == false) {
-				stmt.execute("CREATE TABLE " + tableName + fields);
-			}
-		} catch (SQLException e) {
-			System.err.println("Fail to fetch " + tableName + " Information: " + e.getMessage());
-			System.exit(0);
-		}
-	}
-	
-	private synchronized void quit() {
-		quit = true;
-		notifyAll();
-	}
-	
-	private void closeDatabase() {
-		try {
-			if (resultSet != null) {
-				resultSet.close();
-			}
-			if (stmt != null) {
-				stmt.close();
-			}
-			if (conn != null) {
-				conn.close(); 
-			}
-		} catch (SQLException e) {
-			System.err.println("Fail to close database: " + e.getMessage());
-			System.exit(0);
-		}
-	}
-	
 	private void signUp(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
-		
+		int i = 0;
+		System.out.println("haha"+ i);
 		String userInfo = recv_msg.content;
 		String userName = userInfo.substring(0, userInfo.length()-32);
 		String password = userInfo.substring(userInfo.length()-32);
@@ -339,15 +280,15 @@ public class Client implements Runnable {
 				"(senderID, receiverID, Timestamp, Content) " +
 				"VALUES (" + userID + ", " +
 					recv_msg.receiverID + ", " +
-					"datetime('now'), " +
+					"datetime('now'), '" +
 					recv_msg.content + "')");
-			
 			resultSet = stmt.executeQuery(
 				"SELECT MsgID, Timestamp " +
 				"FROM " + messageTable + " " +
 				"WHERE MsgID = (" +
 					"SELECT last_insert_rowid() " +
 					"FROM " + messageTable + ")");
+			
 			resultSet.next();
 			send_msg.msgID = resultSet.getInt("MsgID");
 			send_msg.timestamp = resultSet.getString("Timestamp");

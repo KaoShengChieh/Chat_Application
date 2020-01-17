@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.ServerSocket; 
+import java.net.ServerSocket;
+import java.sql.DriverManager;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
@@ -14,11 +18,25 @@ import java.util.ListIterator;
 public class Server 
 { 
 	private static final String CONFIG = "./ServerConfig.txt";
+	private static final String protocol = "jdbc:sqlite:";
+	private static final String filepath = "./data/";
+	private static final String database = "database";
+	private static final String userTable = "User";
+	private static final String friendTable = "Friend";
+	private static final String messageTable = "Message";
+	private static final String userFields = "(UserID INTEGER PRIMARY KEY, UserName TEXT UNIQUE, Password TEXT)";
+	private static final String friendFields = "(FriendAID INTEGER, FriendBID INTEGER, PRIMARY KEY (FriendAID, FriendBID))";
+	private static final String messageFields = "(MsgID INTEGER PRIMARY KEY AUTOINCREMENT, senderID INTEGER, receiverID INTEGER, Timestamp DATETIME, Content TEXT)";
+	
 	private ServerSocket serverSocket;
-	private List<ClientHandler> clientList = new ArrayList<>();
+	private List<ClientHandler> clientList;
+	private Connection conn;
+	private Statement stmt;
 
 	public static void main(String[] args) throws IOException { 
 		Server server = new Server(CONFIG);
+		server.clientList = new ArrayList<>();
+		server.connectDatabase();
 		
 		System.out.println("Server listening......");
 		
@@ -92,7 +110,7 @@ public class Server
 		
 		System.out.println("Creating a new handler for this client...");
 			
-		return new ClientHandler(socket, inputObject, outputObject, clientList);
+		return new ClientHandler(socket, inputObject, outputObject, clientList, stmt);
 	}
 	
 	private void close() {
@@ -103,6 +121,44 @@ public class Server
 			System.out.println("Server socket close error");
 			e.printStackTrace();
 		} finally {
+			System.exit(0);
+		}
+	}
+	
+	private void connectDatabase() {
+		try {
+			conn = DriverManager.getConnection(protocol + filepath + database);
+			stmt = conn.createStatement();
+			createTableIfNotExists(userTable, userFields);
+			createTableIfNotExists(friendTable, friendFields);
+			createTableIfNotExists(messageTable, messageFields);
+		} catch (SQLException e) {
+			System.err.println("Fail to connect database: " + e.getMessage());
+			System.exit(0);
+		}
+	}
+	
+	private void createTableIfNotExists(String tableName, String fields) {
+		try {
+			if (conn.getMetaData().getTables(null, null, tableName, null).next() == false) {
+				stmt.execute("CREATE TABLE " + tableName + fields);
+			}
+		} catch (SQLException e) {
+			System.err.println("Fail to fetch " + tableName + " Information: " + e.getMessage());
+			System.exit(0);
+		}
+	}
+	
+	private void closeDatabase() {
+		try {
+			if (stmt != null) {
+				stmt.close();
+			}
+			if (conn != null) {
+				conn.close(); 
+			}
+		} catch (SQLException e) {
+			System.err.println("Fail to close database: " + e.getMessage());
 			System.exit(0);
 		}
 	}

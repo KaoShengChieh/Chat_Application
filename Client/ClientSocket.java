@@ -82,7 +82,7 @@ public class ClientSocket
                         e.printStackTrace();
                         close("Disconnected with server");
                     } finally {
-                    	localCache.setOfflineBySocket();
+                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				}
 			}).start(); 
@@ -102,7 +102,7 @@ public class ClientSocket
                         e.printStackTrace();
                         close("Fail to Serialized/Deserialized");
                     } finally {
-                    	localCache.setOfflineBySocket();
+                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				} 
 			}).start();

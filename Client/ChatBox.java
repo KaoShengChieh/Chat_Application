@@ -70,9 +70,9 @@ public class ChatBox extends JFrame implements View{
 	 * Create the frame.
 	 */
 	public ChatBox(ProxyServer localCache, User friend) {
-		
 		this.localCache = localCache;
 		localCache.changeView(this);
+		this.friend = friend;
 		
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

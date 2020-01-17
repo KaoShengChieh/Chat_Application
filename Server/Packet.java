@@ -15,7 +15,8 @@ public class Packet implements java.io.Serializable, Cloneable {
 	public Packet clone() {
 		try {
 			Packet pktCopy = (Packet)super.clone();
-			pktCopy.message = message.clone();
+			if (message != null)
+				pktCopy.message = message.clone();
 			return pktCopy;
 		} catch (CloneNotSupportedException e) {
 			return null;

@@ -2,6 +2,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Statement;
 import java.util.List;
 
 public class ClientHandler implements Runnable {
@@ -14,14 +15,14 @@ public class ClientHandler implements Runnable {
 	public Client client;
 	
 	public ClientHandler(Socket socket, ObjectInputStream inputObject,
-		ObjectOutputStream outputObject, List<ClientHandler> clientList) { 
+		ObjectOutputStream outputObject, List<ClientHandler> clientList, Statement stmt) { 
 		this.socket = socket;
 		this.inputObject = inputObject; 
 		this.outputObject = outputObject; 
 		this.clientList = clientList;
 		sendQueue = new BlockingQueue<>();
 		recvQueue = new BlockingQueue<>();
-		client = new Client(sendQueue, recvQueue, clientList);
+		client = new Client(sendQueue, recvQueue, this, clientList, stmt);
 	}
 
 	public void run() {
@@ -62,18 +63,6 @@ public class ClientHandler implements Runnable {
 		            }
 				}
 			}).start();
-			
-			synchronized (client) {
-				while (client.isQuit() == false) {
-					try {
-						wait();
-					} catch (InterruptedException e)  {
-						Thread.currentThread().interrupt(); 
-					}
-				}
-			}
-			
-			close();
 		} catch (Exception e) {
 			e.printStackTrace();
 			close("Unexpected error");
@@ -97,7 +86,7 @@ public class ClientHandler implements Runnable {
 		recvQueue.push(packet);
 	}
 	
-	private void close() {
+	public void close() {
 		try {
 			if (inputObject != null) {
 				inputObject.close();
@@ -126,10 +115,13 @@ public class ClientHandler implements Runnable {
 		
 		System.err.println("----------" + assistantMessage + "----------");
 		System.err.println("[type] " + packet.type.toString());
-		System.err.println("[msgID] " + message.msgID);
-		System.err.println("[senderID] " + message.senderID);
-		System.err.println("[receiverID] " + message.receiverID);
-		System.err.println("[timestamp] " + message.timestamp);
-		System.err.println("[content] " + message.content);
+		
+		if (message != null) {
+			System.err.println("[msgID] " + message.msgID);
+			System.err.println("[senderID] " + message.senderID);
+			System.err.println("[receiverID] " + message.receiverID);
+			System.err.println("[timestamp] " + message.timestamp);
+			System.err.println("[content] " + message.content);
+		}
 	}
 }

@@ -38,10 +38,14 @@ public class testPanel extends JPanel implements View{
 		for (int i = 0; i < num; i++) {
 			Pair<User, Message> friend = myFriends.get(i);
 			String friendName = friend.first.Name;
-			String latestMsg = friend.second.content;
-			String time = friend.second.timestamp;
+			String latestMsg = "";
+			String time = "";
+			if (friend.second != null) {
+				latestMsg = friend.second.content;
+				time = friend.second.timestamp;
+			}
 			
-			btnFriend[i] = new JButton(time +  "\n" + friendName + ": " + latestMsg);
+			btnFriend[i] = new JButton(friendName + "\t \t" + time + "\n" + latestMsg);
 			btnFriend[i].setBounds(6, 6 + 100 * i, 290, 100);
 			add(btnFriend[i]);
 			btnFriend[i].addMouseListener(new MouseAdapter() {

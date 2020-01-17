@@ -210,7 +210,12 @@ public class AddFriend extends JFrame implements View {
 				String friendName = SearchFriend.getText().toString();
 				//check if username exist
 				boolean exist  = false;
-				exist = localCache.addFriend(friendName);
+				
+				try {
+					exist = localCache.addFriend(friendName);
+				} catch (SQLException ee) {
+					setErrorMessage(ee.getMessage());
+				}
 				if (exist) {
 					int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
 					if (action == 0) {
@@ -219,7 +224,7 @@ public class AddFriend extends JFrame implements View {
 					SearchFriend.setText("");
 				}
 				else {
-					JOptionPane.showMessageDialog(null, "No such user!");
+					//JOptionPane.showMessageDialog(null, "No such user!");
 					SearchFriend.setText("");
 				}
 			}

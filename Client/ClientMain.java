@@ -215,9 +215,8 @@ public class ClientMain extends JFrame implements View {
 		tabbedPane.addTab("Profile", null, InfoJPanel, null);
 		
 		//get my name and password, need fix
-//		User Me = localCache.getMe();
-		Name = "Me";
-//		Password = "123456";
+		Name = localCache.getUserName();
+		Password = "才不告訴承滿的哥哥";
 		
 		JLabel myName = new JLabel("My Name: " + Name);
 		myName.setHorizontalAlignment(SwingConstants.CENTER);
@@ -229,7 +228,7 @@ public class ClientMain extends JFrame implements View {
 		JLabel myPassword = new JLabel("Password: " + Password);
 		myPassword.setHorizontalAlignment(SwingConstants.CENTER);
 		myPassword.setForeground(Color.ORANGE);
-		myPassword.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 30));
+		myPassword.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 23));
 		myPassword.setBackground(new Color(0, 102, 204));
 		InfoJPanel.add(myPassword);
 		

@@ -153,12 +153,6 @@ public class ChatBox extends JFrame implements View{
 		textAreaChat.setLineWrap(true);
 		textAreaChat.setFont(new Font("Toppan Bunkyu Gothic", Font.BOLD, 16));
 		scrollPaneChat.setViewportView(textAreaChat);
-		lblFile.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-			}
-		});
 		Function_loadHistory();
 	}
 	public void Function_loadHistory()
@@ -219,13 +213,14 @@ public class ChatBox extends JFrame implements View{
 		String recvMsg = message.content;
 		//Add the message to the chat box.
 		String usr;
+		String time_i = message.timestamp;
 		if(message.senderID == friend.ID) {
 			usr = friend.Name;
 		}
 		else {
 			usr = "Me";
 		}
-		textAreaChat.append(usr + ": " + "\n" + recvMsg +"\n\n");
+		textAreaChat.append("(" + time_i + ")" + usr + ": \n" + recvMsg +"\n\n");
 		//Let the scroll bar to the bottom.
 		textAreaChat.setCaretPosition(textAreaChat.getText().length());
 		textFieldSend.setText("");

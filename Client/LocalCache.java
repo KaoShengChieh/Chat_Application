@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;  
 import java.util.List;
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 public class LocalCache implements ProxyServer
 {
@@ -31,6 +32,7 @@ public class LocalCache implements ProxyServer
 	private BlockingQueue<Packet> recvQueue;
 	private ClientSocket clientSocket;
 	private int userID;
+	private String userName;
 	private View view;
 	private boolean socketIsAlive;
 	private Thread MVCthread;
@@ -105,6 +107,7 @@ public class LocalCache implements ProxyServer
 				return false;
 			}
 			userID = recv_packet.message.senderID;
+			userName = resultSet.getString("UserName");
 			
 			this.update();
 			
@@ -128,6 +131,7 @@ public class LocalCache implements ProxyServer
 			return false;
 		}
 		userID = recv_packet.message.senderID;
+		this.userName = userName;
 		
 		closeDatabase();
 		connectDatabase();
@@ -322,6 +326,7 @@ public class LocalCache implements ProxyServer
 		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
 		
 		userID = -1;
+		userName = null;
 		sendQueue.push(new Packet(Packet.Type.LOG_OUT, null));
 	}
 	
@@ -334,6 +339,14 @@ public class LocalCache implements ProxyServer
 	
 	public void changeView(View view) { 
 		this.view = view;
+	}
+	
+	public String getUserName() {
+		if (userID == -1) {
+			view.setErrorMessage("Not log in yet");
+		}
+		
+		return userName;
 	}
 	
 	private void update() throws SQLException {
@@ -375,9 +388,7 @@ public class LocalCache implements ProxyServer
 				try {
 					while (true) {
 						recv_packet = recvQueue.pop();
-						System.err.println("Receive " + recv_packet.type + " message!!!!!!!!!!");
 						if (recv_packet.type == Packet.Type.QUIT) {
-							System.out.println("Disconnected with server");
 							break;
 						} else if (isSuccessful(recv_packet) == false) {
 							continue;
@@ -390,7 +401,7 @@ public class LocalCache implements ProxyServer
 								newFriend(recv_packet.message);
 								break;
 							case FILE:
-								newFile(recv_packet.message);
+								recvFile(recv_packet.message);
 								break;
 							default:
 								throw new SQLException("Unknown packet: receive " + recv_packet.type + " message");
@@ -421,7 +432,12 @@ public class LocalCache implements ProxyServer
 	private void newFriend(Message message) throws SQLException {
 		int friendID = message.receiverID == userID ?
 			message.senderID : message.receiverID;
-		String friendName = message.content;
+		
+		StringTokenizer tokens = new StringTokenizer(message.content, "/");
+		String friendName = tokens.nextToken();
+		if (friendName.eqauls(userName)) {
+			friendName = tokens.nextToken();
+		}
 		
 		view.newFriend(new User(friendID, friendName));
 		
@@ -430,14 +446,14 @@ public class LocalCache implements ProxyServer
 			"VALUES (" + friendID +  ", '" + friendName + "')");
 	}
 	
-	private void newFile(Message message) throws SQLException {
+	private void recvFile(Message message) throws SQLException {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
    		LocalDateTime now = LocalDateTime.now(); 
 		message.timestamp = now.toString();
 
 		view.newMessage(message);
 		
-		try{
+		try {
 			Runtime rt = Runtime.getRuntime();
 			Process pr = rt.exec("java FileReceiver " + message.content);
 		} catch (IOException e) {

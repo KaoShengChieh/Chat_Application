@@ -273,8 +273,14 @@ public class Client implements Runnable {
 			stmt.execute(
 				"INSERT INTO " + friendTable + " " +
 				"VALUES (" + userID + ", " + friendID + ")");
+				
+			resultSet = stmt.executeQuery(
+				"SELECT userName " +
+				"FROM " + userTable + " " +
+				"WHERE UserID = '" + userID + "'");
 
 			send_msg.receiverID = friendID;
+			send_msg.content += "/" + resultSet.getString("UserName");
 
 			return send_msg;
 		} catch (SQLException e) {

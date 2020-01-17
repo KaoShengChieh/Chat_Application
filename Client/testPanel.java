@@ -18,6 +18,8 @@ public class testPanel extends JPanel implements View{
 	
 	private ProxyServer localCache;
 	private List<Pair<User, Message>> myFriends;
+	private int num;
+	private JButton btnFriend[];
 	/**
 	 * Create the panel.
 	 */
@@ -26,15 +28,16 @@ public class testPanel extends JPanel implements View{
 		setLayout(null);
 		
 		this.localCache = localCache;
+		localCache.changeView(this);
 		try {
 			myFriends = localCache.getFriendList();
 		} catch (SQLException exception) {
 			setErrorMessage(exception.getMessage());
 		}
 		
-		int num = myFriends.size();
+		num = myFriends.size();
 		
-		JButton btnFriend[] = new JButton[10];
+		btnFriend = new JButton[10];
 		for (int i = 0; i < num; i++) {
 			Pair<User, Message> friend = myFriends.get(i);
 			String friendName = friend.first.Name;
@@ -60,7 +63,19 @@ public class testPanel extends JPanel implements View{
 	}
 	public void getOffline(){}
 	public void newMessage(Message message) {
-		
+		for (int i = 0; i < num; i++) {
+			Pair<User, Message> friend = myFriends.get(i);
+			if(friend.first.ID == message.senderID) {
+				
+				String friendName = friend.first.Name;
+				String latestMsg = message.content;
+				String time = message.timestamp;
+				
+				String newMsg = time +  "\n" + friendName + ": " + latestMsg;
+				btnFriend[i].setText(newMsg);
+				break;
+			}
+		}
 	}
 	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {

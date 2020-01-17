@@ -169,7 +169,7 @@ public class ChatBox extends JFrame implements View{
 			int smallestMessageID = -1;
 			history = localCache.getMsgHistory(friend, smallestMessageID);
 			
-			for (int i = 0; i < history.size(); i++) {
+			for (int i = history.size() - 1; i >= 0; i--) {
 				String message_i = history.get(i).content;
 				String time_i = history.get(i).timestamp;
 				String from;
@@ -198,11 +198,11 @@ public class ChatBox extends JFrame implements View{
 			//Store the data.
 			byte data[] = sendMessage.getBytes();
 			//Display the message to the chat box if you send it to your friend.
-			textAreaChat.append("(" + "time" + ")Me: " + "\n" + sendMessage +"\n\n");
+			//textAreaChat.append("(" + "time" + ")Me: " + "\n" + sendMessage +"\n\n");
 			//Let the scroll bar to the bottom.
-			textAreaChat.setCaretPosition(textAreaChat.getText().length());
+			//textAreaChat.setCaretPosition(textAreaChat.getText().length());
 			//Send the message.
-			textFieldSend.setText("");
+			//textFieldSend.setText("");
 		}
 		else {
 			JOptionPane.showMessageDialog(null, "Failed!");
@@ -219,7 +219,14 @@ public class ChatBox extends JFrame implements View{
 	public void newMessage(Message message) {
 		String recvMsg = message.content;
 		//Add the message to the chat box.
-		textAreaChat.append("Friend: " + "\n" + recvMsg +"\n\n");
+		String usr;
+		if(message.senderID == friend.ID) {
+			usr = friend.Name;
+		}
+		else {
+			usr = "Me";
+		}
+		textAreaChat.append(usr + ": " + "\n" + recvMsg +"\n\n");
 		//Let the scroll bar to the bottom.
 		textAreaChat.setCaretPosition(textAreaChat.getText().length());
 	}

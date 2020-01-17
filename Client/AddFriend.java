@@ -209,7 +209,8 @@ public class AddFriend extends JFrame implements View {
 			public void actionPerformed(ActionEvent e) {
 				String friendName = SearchFriend.getText().toString();
 				//check if username exist
-				boolean exist = localCache.addFriend(friendName);
+				boolean exist  = false;
+				exist = localCache.addFriend(friendName);
 				if (exist) {
 					int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
 					if (action == 0) {

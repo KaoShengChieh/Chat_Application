@@ -223,6 +223,8 @@ public class LocalCache implements ProxyServer
 		if (isSuccessful(recv_packet) == false) {
 			return false;
 		}
+		newFriend(recv_packet.message);
+		
 		this.update();
 		
 		return true;

@@ -435,7 +435,7 @@ public class LocalCache implements ProxyServer
 		
 		StringTokenizer tokens = new StringTokenizer(message.content, "/");
 		String friendName = tokens.nextToken();
-		if (friendName.eqauls(userName)) {
+		if (friendName.equals(userName)) {
 			friendName = tokens.nextToken();
 		}
 		

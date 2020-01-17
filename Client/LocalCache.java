@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -6,6 +7,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;  
 import java.util.List;
 import java.util.ArrayList;
 
@@ -31,6 +34,7 @@ public class LocalCache implements ProxyServer
 	private int userID;
 	private boolean socketIsAlive;
 	private Thread MVCthread;
+	private boolean isSuccessful;
 	
 	public LocalCache() {
 		this.connectDatabase();
@@ -208,10 +212,12 @@ public class LocalCache implements ProxyServer
 		Message message = new Message();
 		message.senderID = userID;
 		message.content = friendName;
-	
-		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
 		
-		return true;
+		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
+		try{
+		Thread.sleep(1);} catch(Exception e){}
+		
+		return isSuccessful;
 	}
 	
 	public List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException {
@@ -261,6 +267,28 @@ public class LocalCache implements ProxyServer
 		message.content = content;
 	
 		sendQueue.push(new Packet(Packet.Type.MESSAGE, message));
+		
+		return true;
+	}
+	
+	public boolean sendFile(User friend, String fileName) {
+		if (checkConnectionState() == false) {
+			return false;
+		}
+		
+		Message message = new Message();
+		message.senderID = userID;
+		message.receiverID = friend.ID;
+		message.content = fileName;
+		
+		try {
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec("java FileSender " + fileName);
+		} catch (IOException e) {
+			view.setErrorMessage("Unable to send file: " + e.getMessage());
+		}
+		
+		sendQueue.push(new Packet(Packet.Type.FILE, message));
 		
 		return true;
 	}
@@ -339,6 +367,7 @@ public class LocalCache implements ProxyServer
 				try {
 					while (true) {
 						recv_packet = recvQueue.pop();
+						System.err.println("Receive " + recv_packet.type + " message!!!!!!!!!!");
 						if (recv_packet.type == Packet.Type.QUIT) {
 							System.out.println("Disconnected with server");
 							break;
@@ -351,6 +380,9 @@ public class LocalCache implements ProxyServer
 								break;
 							case ADD_FRIEND:
 								newFriend(recv_packet.message);
+								break;
+							case FILE:
+								newFile(recv_packet.message);
 								break;
 							default:
 								throw new SQLException("Unknown packet: receive " + recv_packet.type + " message");
@@ -390,6 +422,21 @@ public class LocalCache implements ProxyServer
 			"VALUES (" + friendID +  ", '" + friendName + "')");
 	}
 	
+	private void newFile(Message message) throws SQLException {
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+   		LocalDateTime now = LocalDateTime.now(); 
+		message.timestamp = now.toString();
+
+		view.newMessage(message);
+		
+		try{
+			Runtime rt = Runtime.getRuntime();
+			Process pr = rt.exec("java FileReceiver " + message.content);
+		} catch (IOException e) {
+			view.setErrorMessage("Unable to receive file: " + e.getMessage());
+		}
+	}
+	
 	private String encrypt(String strToEncrypt) {
 		try { 
 			MessageDigest md = MessageDigest.getInstance("MD5"); 
@@ -414,7 +461,8 @@ public class LocalCache implements ProxyServer
 		if (packet.message.msgID == -1 && packet.message.content != null) {
 			view.setErrorMessage(packet.message.content);
 		}
-		return packet.message.msgID != -1;
+		isSuccessful = packet.message.msgID != -1;
+		return isSuccessful;
 	}
 	
 	private boolean checkConnectionState() {

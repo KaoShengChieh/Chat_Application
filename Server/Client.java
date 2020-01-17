@@ -71,7 +71,7 @@ public class Client implements Runnable {
 					update(recv_packet.message);
 					continue;
 				}
-				int i = 0; // TODO
+				
 				itr = clientList.listIterator();
 				switch (recv_packet.type) {
 					case ADD_FRIEND:
@@ -86,8 +86,6 @@ public class Client implements Runnable {
 								|| other.client.userID() == recv_packet.message.senderID) {
 								other.client.addFriendNotice(send_msg);
 							}
-												
-							System.err.println(i++); //TODO
 						}
 						break;
 					case MESSAGE:
@@ -104,6 +102,13 @@ public class Client implements Runnable {
 							}
 						}
 						break;
+					case FILE:
+						while (itr.hasNext()) {
+							other = itr.next();
+							if (other.client.userID() == recv_packet.message.receiverID) {
+								other.client.newFileNotice(recv_packet.message);
+							}
+						}
 				}
 			}
 		} catch (Exception e){
@@ -304,5 +309,9 @@ public class Client implements Runnable {
 	
 	private void newMsgNotice(Message send_msg) {
 		sendQueue.push(new Packet(Packet.Type.MESSAGE, send_msg));
+	}
+	
+	private void newFileNotice(Message recv_msg) {
+		sendQueue.push(new Packet(Packet.Type.FILE, recv_msg));
 	}
 }

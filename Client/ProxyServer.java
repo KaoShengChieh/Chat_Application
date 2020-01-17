@@ -43,6 +43,8 @@ public interface ProxyServer {
 	 */
 	boolean sendMessage(User friend, String message);
 	
+	boolean sendFile(User friend, String file);
+	
 	/*
 	 * Return true, if reconnect successfully
 	 * Return false, otherwise

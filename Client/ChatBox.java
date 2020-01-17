@@ -169,7 +169,7 @@ public class ChatBox extends JFrame implements View{
 			int smallestMessageID = -1;
 			history = localCache.getMsgHistory(friend, smallestMessageID);
 			
-			for (int i = 0; i < history.size(); i++) {
+			for (int i = history.size() - 1; i >= 0; i--) {
 				String message_i = history.get(i).content;
 				String time_i = history.get(i).timestamp;
 				String from;
@@ -211,10 +211,9 @@ public class ChatBox extends JFrame implements View{
 	
 	public void Function_SendFile()
 	{
-//		String filePath = new FileChooser_JFrame().getFilePath();
-//		//Test
-//		System.out.println(filePath);
+		localCache.sendFile(friend, textFieldSend.getText().toString());
 	}
+	
 	public void getOffline(){}
 	public void newMessage(Message message) {
 		String recvMsg = message.content;
@@ -222,6 +221,7 @@ public class ChatBox extends JFrame implements View{
 		textAreaChat.append("Friend: " + "\n" + recvMsg +"\n\n");
 		//Let the scroll bar to the bottom.
 		textAreaChat.setCaretPosition(textAreaChat.getText().length());
+		textFieldSend.setText("");
 	}
 	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {

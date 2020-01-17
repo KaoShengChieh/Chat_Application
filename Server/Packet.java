@@ -2,7 +2,7 @@ public class Packet implements java.io.Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
 		
 	public enum Type {
-		LOG_IN, SIGN_UP, ADD_FRIEND, MESSAGE, UPDATE, LOG_OUT, QUIT;
+		LOG_IN, SIGN_UP, ADD_FRIEND, MESSAGE, FILE, UPDATE, LOG_OUT, QUIT;
 	}
 	public Type type;
 	public Message message;

@@ -205,7 +205,13 @@ public class ChatBox extends JFrame implements View{
 	
 	public void Function_SendFile()
 	{
-		localCache.sendFile(friend, textFieldSend.getText().toString());
+		if (localCache.sendFile(friend, textFieldSend.getText().toString())) {
+			
+			textAreaChat.append("(time)" + localCache.getUserName() + ": \n" + textFieldSend.getText().toString() +"\n\n");
+			//Let the scroll bar to the bottom.
+			textAreaChat.setCaretPosition(textAreaChat.getText().length());
+			textFieldSend.setText("");
+		}
 	}
 	
 	public void getOffline(){}

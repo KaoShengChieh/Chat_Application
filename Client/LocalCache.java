@@ -22,18 +22,22 @@ public class LocalCache implements ProxyServer
 	private static final String messageFields = "(MessageID INTEGER PRIMARY KEY, SenderID INTEGER, ReceiverID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
 	private Statement stmt;
-	private View GUI;
+	private ResultSet resultSet;
+	
+	private View view;
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
 	private ClientSocket clientSocket;
 	private int userID;
+	private boolean socketIsAlive;
 	
 	public LocalCache() {
 		this.connectDatabase();
 		
 		sendQueue = new BlockingQueue<>();
 		recvQueue = new BlockingQueue<>();
-		clientSocket = new ClientSocket(sendQueue, recvQueue);
+		clientSocket = new ClientSocket(sendQueue, recvQueue, this);
+		clientSocket.connect();
 		
 		userID = -1;
 	}
@@ -50,26 +54,40 @@ public class LocalCache implements ProxyServer
 	
 	private void closeDatabase() {
 		try {
+			if (resultSet != null) {
+				resultSet.close();
+			}
+			if (stmt != null) {
+				stmt.close();
+			}
 			if (conn != null) {
-				conn.close();
+				conn.close(); 
 			}
 		} catch (SQLException e) {
-			System.err.println("Fail to close cache database: " + e.getMessage());
+			System.err.println("Fail to close cachedatabase: " + e.getMessage());
 			System.exit(0);
 		}
 	}
 	
-	public boolean getOnline() {
-		clientSocket.connect();
-		return clientSocket.isLive;
+	public void setOnlineBySocket() {
+		socketIsAlive = true;
+	}
+	
+	public void setOfflineBySocket() {
+		socketIsAlive = false;
+		view.getOffline();
 	}
 	
 	public boolean autoLogIn() throws SQLException {
+		if (checkConnectionState() == false) {
+			return false;
+		}
+		
 		if (conn.getMetaData().getTables(null, null, userTable, null).next() == false) {
 			return false;
 		}
 		
-		ResultSet resultSet = stmt.executeQuery(
+		resultSet = stmt.executeQuery(
 			"SELECT * " +
 			"FROM " + userTable);
 		
@@ -77,31 +95,37 @@ public class LocalCache implements ProxyServer
 			return false;
 		} else {
 			Message message = new Message();
-			message.content = resultSet.getString("UserName") +
-				resultSet.getString("Password");
+			message.content = resultSet.getString("UserName") + resultSet.getString("Password");
 			sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
+			
 			Packet recv_packet = recvQueue.pop();
+			if (isSuccessful(recv_packet) == false) {
+				return false;
+			}
 			userID = recv_packet.message.senderID;
 			
 			this.update();
 			
-			return userID != -1 ? true : false;
+			return true;
 		}
 	}
 	
 	public boolean logIn(String userName, String password, boolean KeepLogIn) throws SQLException {
+		if (checkConnectionState() == false) {
+			return false;
+		}
+		
 		password = encrypt(password);
 		
 		Message message = new Message();
 		message.content = userName + password;
 		sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
-		Packet recv_packet = recvQueue.pop();
-		userID = recv_packet.message.senderID;
 		
-		if (userID == -1) {
-			GUI.setErrorMessage(recv_packet.message.content);
+		Packet recv_packet = recvQueue.pop();
+		if (isSuccessful(recv_packet) == false) {
 			return false;
 		}
+		userID = recv_packet.message.senderID;
 		
 		stmt.execute("DROP TABLE IF EXISTS " + userTable);
 		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
@@ -122,28 +146,23 @@ public class LocalCache implements ProxyServer
 	}
 	
 	public boolean signUp(String userName, String password) {
+		if (checkConnectionState() == false) {
+			return false;
+		}
+		
 		password = encrypt(password);
 		
 		Message message = new Message();
 		message.content = userName + password;
 		sendQueue.push(new Packet(Packet.Type.SIGN_UP, message));
-		Packet recv_packet = recvQueue.pop();
-		String errorMessage = recv_packet.message.content;
 		
-		if (errorMessage == null) {
-			return true;
-		} else {
-			GUI.setErrorMessage(errorMessage);
-			return false;
-		}
+		return isSuccessful(recvQueue.pop());
 	}
 
 	public List<Pair<User, Message>> getFriendList() throws SQLException {
 		List<Pair<User, Message>> friendList = new ArrayList<>();
 		
-		ResultSet resultSet = stmt.executeQuery(
-			"SELECT * " +
-			"FROM " + friendTable);
+		resultSet = stmt.executeQuery("SELECT * FROM " + friendTable);
 		
 		while (resultSet.next()) {
 			int friendID = resultSet.getInt("FriendID");
@@ -157,7 +176,7 @@ public class LocalCache implements ProxyServer
 	private Message getNewestMessage(int friendID) throws SQLException {
 		Message message = new Message();
 		
-		ResultSet resultSet = stmt.executeQuery(
+		resultSet = stmt.executeQuery(
 			"SELECT * " +
 			"FROM " + messageTable + " " +
 			"WHERE MessageID IN (" +
@@ -179,12 +198,12 @@ public class LocalCache implements ProxyServer
 	}
 	
 	public boolean addFriend(String friendName) {
-		if (clientSocket.isLive == false) {
+		if (checkConnectionState() == false) {
 			return false;
 		}
 		
 		Message message = new Message();
-		
+		message.senderID = userID;
 		message.content = friendName;
 	
 		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
@@ -194,28 +213,26 @@ public class LocalCache implements ProxyServer
 	
 	public List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException {
 		List<Message> messageHistory = new ArrayList<>();
-		ResultSet resultSet = null;
-		Message message = null;
 		
 		if (smallestMessageID == -1) {
 			resultSet = stmt.executeQuery(
 				"SELECT TOP(30) * " +
 				"FROM " + messageTable + " " +
-				"WHERE SenderID  = " + friend.ID + " " +
-				"OR ReceiverID  = " + friend.ID + " " +
+				"WHERE SenderID = " + friend.ID + " " +
+				"OR ReceiverID = " + friend.ID + " " +
 				"ORDER BY MessageID DESC");
 		} else {
 			resultSet = stmt.executeQuery(
 				"SELECT TOP(30) * " +
 				"FROM " + messageTable + " " +
 				"WHERE MessageID < " + smallestMessageID + " " +
-				"AND (SenderID  = " + friend.ID + " " +
-				"OR ReceiverID  = " + friend.ID + ") " +
+				"AND (SenderID = " + friend.ID + " " +
+				"OR ReceiverID = " + friend.ID + ") " +
 				"ORDER BY MessageID DESC");
 		}
 		
 		while (resultSet.next()) {
-			message = new Message();
+			Message message = new Message();
 			message.msgID = resultSet.getInt("MessageID");
 			message.senderID = resultSet.getInt("SenderID");
 			message.receiverID = resultSet.getInt("ReceiverID");
@@ -228,12 +245,12 @@ public class LocalCache implements ProxyServer
 	}
 	
 	public boolean sendMessage(User friend, String content) {
-		if (clientSocket.isLive == false) {
+		if (checkConnectionState() == false) {
 			return false;
 		}
 		
 		Message message = new Message();
-		
+		message.senderID = userID;
 		message.receiverID = friend.ID;
 		message.content = content;
 	
@@ -246,7 +263,7 @@ public class LocalCache implements ProxyServer
 		clientSocket.connect();
 		this.update();
 		
-		return clientSocket.isLive;
+		return socketIsAlive;
 	}
 	
 	public void logOut() throws SQLException {
@@ -264,7 +281,7 @@ public class LocalCache implements ProxyServer
 	}
 	
 	public void changeView(View view) { 
-		this.GUI = view;
+		this.view = view;
 	}
 	
 	private void update() throws SQLException {
@@ -273,22 +290,24 @@ public class LocalCache implements ProxyServer
 	 * 2. Open thread process received packet *
 	 * 3. Monitor client socket               *
 	 ******************************************/
+		if (socketIsAlive == false) {
+			return;
+		}
+		
 		Message message = new Message();
 		
-		ResultSet resultSet = stmt.executeQuery(
-			"SELECT MAX(MessageID), MessageID " +
-			"FROM " + messageTable);
-			
-		if (resultSet.next() == false)
-			return;
-		
-		message.msgID = resultSet.getInt("MessageID");
-		
 		resultSet = stmt.executeQuery(
-			"SELECT FriendID " +
-			"FROM " + friendTable);
+			"SELECT * " +
+			"FROM " + messageTable + " " +
+			"WHERE MessageID IN (" +
+				"SELECT MAX(MessageID) " +
+				"FROM " + messageTable + ")");
+		
+		message.msgID = resultSet.next() ? resultSet.getInt("MessageID") : -1;
+		
+		resultSet = stmt.executeQuery("SELECT FriendID FROM " + friendTable);
 		while (resultSet.next()) {
-			message.content += resultSet.getInt("FriendID") + " ";
+			message.content += resultSet.getInt("FriendID") + "/";
 		}
 		
 		sendQueue.push(new Packet(Packet.Type.UPDATE, message));
@@ -299,7 +318,9 @@ public class LocalCache implements ProxyServer
 				try {
 					while (true) {
 						recv_packet = recvQueue.pop();
-						
+						if (isSuccessful(recv_packet) == false) {
+							break;
+						}
 						switch (recv_packet.type) {
 							case MESSAGE:
 								recvMessage(recv_packet.message);
@@ -308,26 +329,21 @@ public class LocalCache implements ProxyServer
 								newFriend(recv_packet.message);
 								break;
 							case QUIT:
-								throw new SQLException("Disconnected from server");
+								throw new SQLException("Disconnected from server");  //TODO
 							default:
 								throw new SQLException("Unknown packet: receive " + recv_packet.type + " message");
 						}
 					}
 				} catch (SQLException e) {
-					GUI.setErrorMessage(e.getMessage());
-					GUI.getOffline();
+					view.setErrorMessage(e.getMessage());
+					view.getOffline();
 				}
 			}
 		}).start();
 	}
 	
 	private void recvMessage(Message message) throws SQLException {
-		if (message.msgID == -1) {
-			GUI.setErrorMessage(message.content);
-			return;
-		}
-		
-		GUI.newMessage(message);
+		view.newMessage(message);
 		
 		stmt.execute(
 			"INSERT INTO " + userID + " " +
@@ -339,19 +355,11 @@ public class LocalCache implements ProxyServer
 	}
 	
 	private void newFriend(Message message) throws SQLException {
-		int friendID;
-		String friendName;
-		
-		if (message.receiverID == -1) {
-			GUI.setErrorMessage(message.content);
-			return;
-		} 
-		
-		friendID = message.receiverID == userID ?
+		int friendID = message.receiverID == userID ?
 			message.senderID : message.receiverID;
-		friendName = message.content;
+		String friendName = message.content;
 		
-		GUI.newFriend(new User(friendID, friendName));
+		view.newFriend(new User(friendID, friendName));
 		
 		stmt.execute(
 			"INSERT INTO " + friendTable + " " +
@@ -376,5 +384,20 @@ public class LocalCache implements ProxyServer
 		} catch (NoSuchAlgorithmException e) { 
 			throw new RuntimeException(e); 
 		}
+	}
+	
+	private boolean isSuccessful(Packet packet) {
+		if (packet.message.msgID == -1 && packet.message.content != null) {
+			view.setErrorMessage(packet.message.content);
+		}
+		return packet.message.msgID != -1;
+	}
+	
+	private boolean checkConnectionState() {
+		if (socketIsAlive) {
+			return true;
+		}
+		view.setErrorMessage("Does not connect to Internet");
+		return false;
 	}
 }

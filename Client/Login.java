@@ -55,7 +55,6 @@ public class Login extends JFrame implements View {
 				try {
 					ProxyServer localCache = new LocalCache();
 					Login frame = new Login(localCache);
-					localCache.getOnline();
 					
 					frame.setUndecorated(true);
 					frame.setVisible(true);

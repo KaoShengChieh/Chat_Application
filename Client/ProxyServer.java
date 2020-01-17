@@ -3,12 +3,6 @@ import java.util.List;
 
 public interface ProxyServer {
 	/*
-	 * Return true, if connect to Internet successfully
-	 * Return false, otherwise
-	 */
-	boolean getOnline();
-	
-	/*
 	 * Return true, if automatically log in successfully
 	 * Return false, otherwise
 	 */

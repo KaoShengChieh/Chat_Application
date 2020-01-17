@@ -17,12 +17,13 @@ public class ClientSocket
 	private ObjectOutputStream outputObject;
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
-	public boolean isLive;
+	private LocalCache localCache;
 
-	public ClientSocket(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue) {
+	public ClientSocket(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, LocalCache localCache) {
 		this(CONFIG);
 		this.sendQueue = sendQueue;
 		this.recvQueue = recvQueue;
+		this.localCache = localCache;
 	}
 
 	public ClientSocket(String configuration) {
@@ -56,16 +57,17 @@ public class ClientSocket
 		}
 	}
 	
-	public synchronized void connect() {		
+	public void connect() {		
 		try {
 			socket = new Socket(serverAddress, Integer.parseInt(port));
 			outputObject = new ObjectOutputStream(socket.getOutputStream());
 			inputObject = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			this.close("Connection to server failed");
+			localCache.setOfflineBySocket();
+			this.close("Fail to connect server");
 		}
 		
-		this.isLive = true;
+		localCache.setOnlineBySocket();
 		
 		try {
 			new Thread(new Runnable() {
@@ -80,8 +82,7 @@ public class ClientSocket
                         e.printStackTrace();
                         close("Disconnected with server");
                     } finally {
-                    	isLive = false;
-                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
+                    	localCache.setOfflineBySocket();
                     }
 				}
 			}).start(); 
@@ -92,7 +93,6 @@ public class ClientSocket
 					try {
 						while (true) { 
 							recv_packet = readSocket();
-							System.err.println(recv_packet.type.toString());
 							setPacket(recv_packet);
 						}
 					} catch (IOException e) { 
@@ -102,33 +102,15 @@ public class ClientSocket
                         e.printStackTrace();
                         close("Fail to Serialized/Deserialized");
                     } finally {
-                    	isLive = false;
-                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
+                    	localCache.setOfflineBySocket();
                     }
 				} 
 			}).start();
 		} catch (Exception e) {
 			e.printStackTrace();
 			this.close("Unexpected error");
-			this.isLive = false;
+			localCache.setOfflineBySocket();
 		}
-	}
-	
-	private Packet readSocket() throws IOException, ClassNotFoundException {
-		return (Packet)inputObject.readObject();
-	}
-	
-	private void writeSocket(Packet packet) throws IOException {
-		outputObject.writeObject(packet);
-		outputObject.flush();
-	}
-	
-	private Packet getPacket() {
-		return sendQueue.pop();
-	}
-	
-	private void setPacket(Packet packet) {
-		recvQueue.push(packet);
 	}
 	
 	public void close() {
@@ -151,5 +133,22 @@ public class ClientSocket
 	
 	private void close(String errMessage) {
 		System.err.println(errMessage);
+	}
+	
+	private Packet readSocket() throws IOException, ClassNotFoundException {
+		return (Packet)inputObject.readObject();
+	}
+	
+	private void writeSocket(Packet packet) throws IOException {
+		outputObject.writeObject(packet);
+		outputObject.flush();
+	}
+	
+	private Packet getPacket() {
+		return sendQueue.pop();
+	}
+	
+	private void setPacket(Packet packet) {
+		recvQueue.push(packet);
 	}
 }

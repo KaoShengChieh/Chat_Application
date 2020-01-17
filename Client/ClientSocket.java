@@ -18,6 +18,8 @@ public class ClientSocket
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
 	private LocalCache localCache;
+	private boolean inputIsClosed;
+	private boolean outputIsClosed;
 
 	public ClientSocket(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, LocalCache localCache) {
 		this(CONFIG);
@@ -63,7 +65,6 @@ public class ClientSocket
 			outputObject = new ObjectOutputStream(socket.getOutputStream());
 			inputObject = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			localCache.setOfflineBySocket();
 			this.close("Fail to connect server");
 		}
 		
@@ -78,10 +79,14 @@ public class ClientSocket
 							send_packet = getPacket();
 							writeSocket(send_packet);
 						} while (send_packet.type != Packet.Type.QUIT);
-					} catch (IOException e) { 
-                        e.printStackTrace();
-                        close("Disconnected with server");
+						outputIsClosed = true;
+					} catch (IOException e) {
+						outputIsClosed = true;
+		            	if (inputIsClosed == false) {
+                        	close("Disconnected with server: " + e.getMessage());
+                        }
                     } finally {
+                    	localCache.setOfflineBySocket();
                     	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				}
@@ -96,20 +101,22 @@ public class ClientSocket
 							setPacket(recv_packet);
 						}
 					} catch (IOException e) { 
-                        e.printStackTrace();
-                        close("Disconnected with server");
+                        inputIsClosed = true;
+		            	if (outputIsClosed == false) {
+		                    close("Disconnected with server: " + e.getMessage());
+		                }
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                         close("Fail to Serialized/Deserialized");
                     } finally {
+                    	localCache.setOfflineBySocket();
                     	recvQueue.push(new Packet(Packet.Type.QUIT, null));
                     }
 				} 
 			}).start();
 		} catch (Exception e) {
-			e.printStackTrace();
-			this.close("Unexpected error");
 			localCache.setOfflineBySocket();
+			this.close("Unexpected error: " + e.getMessage());
 		}
 	}
 	

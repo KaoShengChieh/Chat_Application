@@ -29,7 +29,7 @@ public interface ProxyServer {
 	 * Return true, if add friend successfully
 	 * Return false, otherwise
 	 */
-	boolean addFriend(String friendName);
+	boolean addFriend(String friendName) throws SQLException;
 	
 	/*
 	 * Return 30 more previous messages of a friend

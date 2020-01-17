@@ -27,14 +27,13 @@ public class LocalCache implements ProxyServer
 	private Statement stmt;
 	private ResultSet resultSet;
 	
-	private View view;
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
 	private ClientSocket clientSocket;
 	private int userID;
+	private View view;
 	private boolean socketIsAlive;
 	private Thread MVCthread;
-	private boolean isSuccessful;
 	
 	public LocalCache() {
 		this.connectDatabase();
@@ -69,7 +68,7 @@ public class LocalCache implements ProxyServer
 				conn.close(); 
 			}
 		} catch (SQLException e) {
-			System.err.println("Fail to close cachedatabase: " + e.getMessage());
+			System.err.println("Fail to close cache database: " + e.getMessage());
 			System.exit(0);
 		}
 	}
@@ -92,9 +91,7 @@ public class LocalCache implements ProxyServer
 			return false;
 		}
 		
-		resultSet = stmt.executeQuery(
-			"SELECT * " +
-			"FROM " + userTable);
+		resultSet = stmt.executeQuery("SELECT * FROM " + userTable);
 		
 		if (resultSet.next() == false) {
 			return false;
@@ -197,6 +194,7 @@ public class LocalCache implements ProxyServer
 		}
 		
 		message.msgID = resultSet.getInt("MessageID");
+		message.senderID = resultSet.getInt("SenderID");
 		message.receiverID = resultSet.getInt("ReceiverID");
 		message.timestamp = resultSet.getString("Timestamp");
 		message.content = resultSet.getString("Content");
@@ -204,7 +202,7 @@ public class LocalCache implements ProxyServer
 		return message;
 	}
 	
-	public boolean addFriend(String friendName) {
+	public boolean addFriend(String friendName) throws SQLException {
 		if (checkConnectionState() == false) {
 			return false;
 		}
@@ -213,20 +211,27 @@ public class LocalCache implements ProxyServer
 		message.senderID = userID;
 		message.content = friendName;
 		
-		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
-		try{
-		Thread.sleep(1);} catch(Exception e){}
+		try {
+			recvQueue.push(new Packet(Packet.Type.QUIT, null));
+			MVCthread.join();
+		} catch (InterruptedException e) {
+			System.err.println("Unexpected Error: " + e.getMessage());
+		};
 		
-		return isSuccessful;
+		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
+		Packet recv_packet = recvQueue.pop();
+		if (isSuccessful(recv_packet) == false) {
+			return false;
+		}
+		this.update();
+		
+		return true;
 	}
 	
 	public List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException {
 		List<Message> messageHistory = new ArrayList<>();
 		
 		if (smallestMessageID == -1) {
-			if (friend == null)
-				System.out.println("haha");
-			
 			resultSet = stmt.executeQuery(
 				"SELECT * " +
 				"FROM " + messageTable + " " +
@@ -321,6 +326,7 @@ public class LocalCache implements ProxyServer
 	public void quit() {
 		clientSocket.close();
 		this.closeDatabase();
+		recvQueue.push(new Packet(Packet.Type.QUIT, null));
 		sendQueue.push(new Packet(Packet.Type.QUIT, null));
 	}
 	
@@ -355,7 +361,7 @@ public class LocalCache implements ProxyServer
 		if (resultSet.next()) {
 			message.content = "" + resultSet.getInt("FriendID");
 			while (resultSet.next()) {
-				message.content += resultSet.getInt("FriendID") + "/";
+				message.content += "/" + resultSet.getInt("FriendID");
 			}
 		}
 		
@@ -372,7 +378,7 @@ public class LocalCache implements ProxyServer
 							System.out.println("Disconnected with server");
 							break;
 						} else if (isSuccessful(recv_packet) == false) {
-							break;
+							continue;
 						}
 						switch (recv_packet.type) {
 							case MESSAGE:
@@ -461,15 +467,14 @@ public class LocalCache implements ProxyServer
 		if (packet.message.msgID == -1 && packet.message.content != null) {
 			view.setErrorMessage(packet.message.content);
 		}
-		isSuccessful = packet.message.msgID != -1;
-		return isSuccessful;
+		return packet.message.msgID != -1;
 	}
 	
 	private boolean checkConnectionState() {
 		if (socketIsAlive) {
 			return true;
 		}
-		view.setErrorMessage("Does not connect to Internet");
+		view.setErrorMessage("Not connect to Internet");
 		return false;
 	}
 }

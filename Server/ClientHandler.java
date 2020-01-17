@@ -12,6 +12,8 @@ public class ClientHandler implements Runnable {
 	private List<ClientHandler> clientList;
 	private BlockingQueue<Packet> sendQueue;
 	private BlockingQueue<Packet> recvQueue;
+	private boolean inputIsClosed;
+	private boolean outputIsClosed;
 	public Client client;
 	
 	public ClientHandler(Socket socket, ObjectInputStream inputObject,
@@ -38,9 +40,11 @@ public class ClientHandler implements Runnable {
 							printPacket(recv_packet, "recv from client");
 							setPacket(recv_packet);
 						}
-					} catch (IOException e) { 
-		            	e.printStackTrace();
-		            	close("Disconnected with server");
+					} catch (IOException e) {
+						inputIsClosed = true;
+		            	if (outputIsClosed == false) {
+				        	close(e.getMessage());
+		            	}
 		            } catch (ClassNotFoundException e) {
 		                e.printStackTrace();
 		                close("Fail to Serialized/Deserialized");
@@ -57,9 +61,12 @@ public class ClientHandler implements Runnable {
 							printPacket(send_packet, "send from server");
 							writeSocket(send_packet);
 						} while (send_packet.type != Packet.Type.QUIT);
-					} catch (IOException e) { 
-		                e.printStackTrace();
-		                close("Disconnected with server");
+						outputIsClosed = true;
+					} catch (IOException e) {
+						outputIsClosed = true;
+		            	if (inputIsClosed == false) {
+				        	close(e.getMessage());
+		            	}
 		            }
 				}
 			}).start();
@@ -100,8 +107,8 @@ public class ClientHandler implements Runnable {
 		} catch (IOException e) {
 			System.err.println("Socket close error");
 		} finally {
-			System.out.println("Connection with " + (client.userID() >= 0 ? "unknown user" : "user " + client.userID()) + " closed");
 			clientList.remove(this);
+			System.out.println("Connection with " + (client.userID >= 0 ? "user " + client.userID : "unknown user") + " closed");
 		}
 	}
 	

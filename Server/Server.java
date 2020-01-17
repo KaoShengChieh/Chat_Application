@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 public class Server 
 { 
@@ -33,7 +32,7 @@ public class Server
 	private Connection conn;
 	private Statement stmt;
 
-	public static void main(String[] args) throws IOException { 
+	public static void main(String[] args) { 
 		Server server = new Server(CONFIG);
 		server.clientList = new ArrayList<>();
 		server.connectDatabase();
@@ -51,6 +50,7 @@ public class Server
 			} catch (Exception e) {
 				System.out.println("Connection error");
 				e.printStackTrace();
+				server.closeDatabase();
 				server.close();
 			}
 		} 

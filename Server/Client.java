@@ -1,9 +1,9 @@
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 
 public class Client implements Runnable {
@@ -17,7 +17,7 @@ public class Client implements Runnable {
 	private Statement stmt;
 	private ResultSet resultSet;
 	private boolean isLoggedIn;
-	private int userID;
+	public int userID;
 	
 	public Client(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, ClientHandler clientHandler, List<ClientHandler> clientList, Statement stmt) {
 		this.sendQueue = sendQueue;
@@ -40,7 +40,7 @@ public class Client implements Runnable {
 				recv_packet = recvQueue.pop();
 					
 				System.out.println("Receive " +
-					recv_packet.type +" request from " +
+					recv_packet.type + " request from " +
 					(userID == -1 ? "unknown user" : "user " + userID));
 					
 				if (recv_packet.type == Packet.Type.QUIT) {
@@ -54,7 +54,6 @@ public class Client implements Runnable {
 							continue;
 						case LOG_IN:
 							logIn(recv_packet.message);
-							isLoggedIn = (userID != -1);
 							continue;
 						default:
 							continue;
@@ -78,35 +77,36 @@ public class Client implements Runnable {
 						send_msg = addFriend(recv_packet.message);
 						
 						if (send_msg == null)
-							continue;
+							break;
 						
 						while (itr.hasNext()) {
 							other = itr.next();
-							if (other.client.userID() == recv_packet.message.receiverID
-								|| other.client.userID() == recv_packet.message.senderID) {
+							if (other.client.userID == recv_packet.message.receiverID
+								|| other.client.userID == recv_packet.message.senderID) {
 								other.client.addFriendNotice(send_msg);
 							}
 						}
 						break;
 					case MESSAGE:
-						send_msg = newMsg(recv_packet.message);
+						send_msg = newMessage(recv_packet.message);
 						
 						if (send_msg == null)
-							continue;
+							break;
 						
 						while (itr.hasNext()) {
 							other = itr.next();
-							if (other.client.userID() == recv_packet.message.receiverID
-								|| other.client.userID() == recv_packet.message.senderID) {
-								other.client.newMsgNotice(send_msg);
+							if (other.client.userID == recv_packet.message.receiverID
+								|| other.client.userID == recv_packet.message.senderID) {
+								other.client.newMessageNotice(send_msg);
 							}
 						}
 						break;
 					case FILE:
 						while (itr.hasNext()) {
 							other = itr.next();
-							if (other.client.userID() == recv_packet.message.receiverID) {
+							if (other.client.userID == recv_packet.message.receiverID) {
 								other.client.newFileNotice(recv_packet.message);
+								break;
 							}
 						}
 				}
@@ -118,14 +118,9 @@ public class Client implements Runnable {
 		}
 	}
 	
-	public int userID() {
-		return userID;
-	}
-	
 	private void signUp(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
-		int i = 0;
-		System.out.println("haha"+ i);
+		
 		String userInfo = recv_msg.content;
 		String userName = userInfo.substring(0, userInfo.length()-32);
 		String password = userInfo.substring(userInfo.length()-32);
@@ -138,13 +133,11 @@ public class Client implements Runnable {
 				
 			if (resultSet.next() == true) {
 				send_msg.setErrorMessage("Username has been used");
-				sendQueue.push(new Packet(Packet.Type.SIGN_UP, send_msg));
-				return;
+			} else {
+				stmt.execute(
+					"INSERT INTO " + userTable + "(UserName, Password) " +
+					"VALUES ('" + userName +  "', '" + password + "')");
 			}
-			
-			stmt.execute(
-				"INSERT INTO " + userTable + "(UserName, Password) " +
-				"VALUES ('" + userName +  "', '" + password + "')");
 		} catch (SQLException e) {
 			send_msg.setErrorMessage("Unable to sign up: " + e.getMessage());
 		} finally {
@@ -155,7 +148,7 @@ public class Client implements Runnable {
 	private void logIn(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
 
-		String userInfo = send_msg.content;
+		String userInfo = recv_msg.content;
 		String userName = userInfo.substring(0, userInfo.length()-32);
 		String password = userInfo.substring(userInfo.length()-32);
 		
@@ -169,6 +162,7 @@ public class Client implements Runnable {
 			if (resultSet.next() == true) {
 				send_msg.senderID = resultSet.getInt("UserID");
 				userID = send_msg.senderID;
+				isLoggedIn = true;
 			} else {
 				send_msg.setErrorMessage("Username or password is incorrect");
 			}
@@ -182,7 +176,7 @@ public class Client implements Runnable {
 	private void update(Message recv_msg) {
 		try {
 			/* Update friends */
-			resultSet = stmt.executeQuery(
+			resultSet = stmt.executeQuery( //TODO
 				"SELECT UserID AS FriendID, UserName AS FriendName " +
 				"FROM " + friendTable + ", " + userTable + " " +
 				"WHERE (FriendAID = " + userID + " AND UserID = FriendBID) "+
@@ -242,6 +236,7 @@ public class Client implements Runnable {
 	}
 	
 	private Message addFriend(Message recv_msg) {
+		int friendID;
 		Message send_msg = recv_msg.clone();
 		
 		try {
@@ -255,7 +250,25 @@ public class Client implements Runnable {
 				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 				return null;
 			}
-			int friendID = resultSet.getInt("UserID");
+			friendID = resultSet.getInt("UserID");
+			
+			if (friendID == userID) {
+				send_msg.setErrorMessage("Cannot add yourself");
+				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
+				return null;
+			}
+			
+			resultSet = stmt.executeQuery(
+				"SELECT * " +
+				"FROM " + friendTable + " " +
+				"WHERE (FriendAID = " + userID + " AND FriendBID = " + friendID + ") "+
+				"OR (FriendAID = " + friendID + " AND FriendBID = " + userID + ")");
+			
+			if (resultSet.next() == true) {
+				send_msg.setErrorMessage("You and " + recv_msg.content + " are already friends");
+				sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
+				return null;
+			}
 			
 			stmt.execute(
 				"INSERT INTO " + friendTable + " " +
@@ -276,7 +289,7 @@ public class Client implements Runnable {
 		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, send_msg));
 	}
 	
-	private synchronized Message newMsg(Message recv_msg) {
+	private synchronized Message newMessage(Message recv_msg) {
 		Message send_msg = recv_msg.clone();
 		
 		try {
@@ -307,7 +320,7 @@ public class Client implements Runnable {
 		}
 	}
 	
-	private void newMsgNotice(Message send_msg) {
+	private void newMessageNotice(Message send_msg) {
 		sendQueue.push(new Packet(Packet.Type.MESSAGE, send_msg));
 	}
 	

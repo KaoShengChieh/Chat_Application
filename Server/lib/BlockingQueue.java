@@ -5,14 +5,8 @@ public class BlockingQueue <T>
 {
 	private Queue<T> queue = new LinkedList<>();
  	
- 	@SuppressWarnings (value="unchecked")
-	
 	public synchronized void push(T t) {
-		try {
-			queue.add((T)(t.getClass().getMethod("clone").invoke(t)));
-		} catch (Exception e) {
-			throw new RuntimeException("Clone not supported", e);
-		}
+		queue.add(t);
 		
 		notifyAll();
 	}
@@ -29,3 +23,4 @@ public class BlockingQueue <T>
 		return queue.poll();
 	}
 }
+

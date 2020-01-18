@@ -1,0 +1,263 @@
+Journal
+
+ 
+
+C.-C. Hsu, K. C.-J. Lin, Y.-R. Lai, C.-F. Chou,"On Exploiting Spatial-Temporal Uncertainty in Max-min Fairness in Underwater Sensor Networks",to appear in IEEE Communications Letters
+
+ 
+
+Kate Ching-Ju Lin, Chun-Po Wang, Cheng-Fu Chou, Leana Golubchik, "SocioNet: A Social-Based Multimedia Access System for Unstructured P2P Networks", IEEE Trans. Parallel Distrib. Syst. 21(7): 1027-1041 (2010)
+
+ 
+
+Cheng-Fu Chou, William C. Cheng, Leana Golubchik,"Performance study of online batch-based digital signature schemes", J. Network and Computer Applications 33(2): 98-114 (2010)
+
+ 
+
+Kate Ching-Ju Lin, Cheng-Fu Chou,"Exploiting multiple rates to maximize the throughput of wireless mesh networks", IEEE Transactions on Wireless Communications 8(12): 6038-6049 (2009)
+
+ 
+
+Chun-Yuan Chang, Cheng-Fu Chou, Din-Yuen Chan, Tsungnan Lin, and Ming-Hung Chen, ``A q-Domain Characteristic-Based Bitrate Model for Video Transmission¡¨, IEEE Transactions on Circuits and Systems for Video Technology, Vol. 18, No. 9, p.1307 - p.1311, 2008.
+
+ 
+
+Ling-Jyh Chen, Chen-Hung Yu, Cheng-Long Tseng, Hao-hua Chu, and Cheng-Fu Chou, ``A Content-Centric Framework for Effective Data Dissemination in Opportunistic Networks¡¦¡¦, IEEE Journal of Selected Areas in Communications (JSAC), volume 26, number 5, pp. 761-772, June, 2008.
+
+ 
+
+Ching-Ju Lin and Cheng-Fu Chou,¡¨ Cooperative Content Dissemination in Multi-channel WLAN Hotspots¡¨, Computer Network, Vol. 52, Issue 3, pp. 720-738, Feb. 2008
+
+ 
+
+Cheng-Fu Chou, Leana Golubchik, John C. S. Lui: Multiclass Multiserver Threshold-Based Systems: A Study of Noninstantaneous Server Activation. IEEE Trans. Parallel Distrib. Syst. 18(1): 96-110 (2007).
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, S. Khuller, and J. Y.C. Wan, ``A Coordinated Data Collection Approach: Design, Evaluation, and Comparison.'' IEEE Journal on Selected Areas in Communications (JSAC), special issue on Design, Implementation and Analysis of Communication Protocols, Vol. 1, No. 11, Nov. 2004.
+
+ 
+
+L. Golubchik, W. C. Cheng, C.-F. Chou, S. Khuller, H. Samet, and J. Y.C. Wan, ``Bistro: A Scalable and Secure Data Transfer Service for Digital Government Applications''. Communications of the ACM (CACM), Vol. 46, No. 1, pages 50-51, January, (2003)
+
+ 
+
+ Cheng-Fu Chou, Leana Golubchik, John C. S. Lui, I-Hsin Chung: ``Design of Scalable Continuous Media Servers''. Multimedia Tools and Applications 17(2-3): 181-212 (2002)
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, and S. Khuller. ``A Performance Study of Bistro, a Scalable Upload Architecture.'' ACM Sigmetrics Performance Evaluation Review, Vol. 29, No. 4, pages 31-39, March 2002.
+
+ 
+
+Leana Golubchik, Richard R. Muntz, Cheng-Fu Chou, Steven Berson, ``Design of Fault-Tolerant Large-Scale VOD Servers: With Emphasis on High-Performance and Low-Cost''. IEEE Transactions on Parallel and Distributed Systems 12(4): 363-386 (2001)
+
+ 
+
+ 
+
+B. Bhattacharjee, W. C. Cheng, C.-F. Chou, L. Golubchik, and S. Khuller, ``Bistro: a Platform for Building Scalable Wide-Area Upload Applications.'' In ACM Sigmetric Performance Evaluation Review (also presented at the Workshop on Performance and Architecture of Web Servers (PAWS) in June 2000), Vol. 28, No. 2, pages 29-35, September, 2000.
+
+ 
+
+Conference
+
+ 
+
+Chien-Chun Hung, Kate Ching-Ju Lin, Chih-Cheng Hsu, Cheng-Fu Chou and Chang-Jen Tu,¡¨ On Enhancing Network-Lifetime Using Opportunistic Routing in Wireless Sensor Networks¡¨, in IEEE ICCCN 2010.
+
+ 
+
+Ming-Hung Chen, Kate Ching-Ju Lin, Chui-Chiu Kung, Cheng-Fu Chou, and Chang-Jen Tu, ¡§On the Design of the Semantic P2P System for Music Recommendation¡¨, in the IEEE International Symposium on Parallel and Distributed Processing with Applications, 2010.
+
+ 
+
+Kate, Ching-Ju Lin, Sz-Ting Shen, and Cheng-Fu Chou, ¡§Rate-Loss-Based Channel Assignment in Multi-Rate Wireless Mesh Networks¡¦¡¦, in the IEEE VTC 2010 spring.
+
+ 
+
+Chun-Yuan Chang, Ti-Chia Chiu, You-Ming Chen, Ming-Hung Chen, Cheng-Fu Chou,``IMPROVED MIN-COST FLOW SCHEDULER FOR MESH-BASED P2P STREAMING SYSTEM¡¦¡¦, IEEE ICME 2009
+
+ 
+
+Chih-Cheng Hsu, Kuang-Fu Lai, Cheng-Fu Chou, Kate Ching-Ju Lin,`` ST-MAC: A Spatial-Temporal MAC Scheduling for Underwater Sensor Network¡¦¡¦, IEEE INFOCOM¡¦09
+
+ 
+
+Chun-Yuan Chang, Cheng-Fu Chou ,Ti-Chia Chiu ,You-Ming Chen, and Yen-Ching Chou,``Conducting Rate-Distortion Optimization in Data-Driven P2P Video Streaming¡¦¡¦, ACM SIGCOMM poster, 2009
+
+ 
+
+Ting-Ge Li, Chih-Cheng Hsu, Cheng-Fu Chou, Ching-Ju Lin ,``On Reliable Transmission by Adaptive Network Coding in Wireless Sensor Networks¡¦¡¦, IEEE International Conference on Communications, ICC'09, 2009.
+
+ 
+
+Sung-Han Lin, Junn-Yen, Hu, Cheng-Fu Chou, Ing-Chau Chang, Chien-Chun Hung,``A Novel Social Cluster-based P2P Framework for Integrating VANETs with the Internet¡¦¡¦, IEEE Wireless Communication and Networking Conference (WCNC), Apr., 2009.
+
+ 
+
+Chih-Cheng Hsu, Cheng-Fu Chou, Kate Ching-Ju Lin, Chien-Chun Hung,``Virtual Domain and Coordinate Routing in Wireless Sensor Networks¡¦¡¦, IEEE Wireless Communication and Networking Conference (WCNC), Apr., 2009.
+
+ 
+
+Hsin-Ping Fan; Chui-Chiu Kung; Cheng-Fu Chou, Adaptive Transmission Protocol for Protection of Primary Users in Cognitive Radio, IEEE International Conference on Communications, ICC'08, Jun. , 2008.
+
+ 
+
+Chien-Shiu Lin, Wei-Shyh Chang, Ling-Jyh Chen, and Cheng-Fu Chou, ``Performance Study of Routing Schemes in Delay Tolerant Networks¡¥¡¦, The first International Workshop on Opportunistic Networks (WON'08, in conjunction with IEEE AINA'08), Ginowan, Okinawa, Japan, 2008
+
+ 
+
+Ling-Jyh Chen, Cheng-Long Tseng and Cheng-Fu Chou,¡¨ On Using Probabilistic Forwarding to Improve HEC-based Data Forwarding in Opportunistic Networks¡¨, in the 2007 IFIP International Conference on Embedded and Ubiquitous Computing (EUC-07), to be held in Taipei, Taiwan, December 17-20, 2007.
+
+ 
+
+Junn-Yen Hu, Chen-Fu Chou and Min-Shi Sha,¡¨ M-NEMO: Micro Mobility Scheme for Network Mobility¡¨, in the 3rd IFIP International Symposium on Network Centric Ubiquitous Systems (NCUS 2007),Taipei, Taiwan, December 17- 20, 2007
+
+ 
+
+Chih-Cheng Hsu, Ming-Hung Chen, Chen-Fu Chou and Wei-Chih Chi,¡¨ ANSWER: Adaptive Network Selection in WLAN/UMTS EnviRonment¡¨, in the 3rd IFIP International Symposium on Network Centric Ubiquitous Systems (NCUS 2007),Taipei, Taiwan, December 17- 20, 2007
+
+ 
+
+Ching-Ju Lin, Sung-Han Lin and Cheng-Fu Chou, ¡§Performance Study of Optimal Routing and Channel Assignment in Wireless Mesh Networks¡¨, in the 50th IEEE GLOBECOM, Nov. 2007
+
+ 
+
+Ching-Ju Lin, Yi-Ting Chang, Shuo-Chan Tsai, and Cheng-Fu Chou,¡¨ Enabling Keyword Search and Similarity Search in Small-World-based P2P Systems¡¨, in The 16th IEEE International Conference on Computer Communications and Networks, Aug. 13 - 16, 2007, Honolulu, Hawaii USA
+
+ 
+
+Ling-Jyh Chen, Cheng-Fu Chou, Bo-Chun Wang, ¡¨A Machine Learning-based Approach for Estimating Available Bandwidth¡¨, IEEE TENCON 2007, Taipei, Taiwan, 2007. (EI)
+
+ 
+
+Ling-Jyh Chen, Chih-Wei Sung, Hao-Hsiang Hung, Tony Sun, and Cheng-Fu Chou, ¡§ TSProbe: A Link Capacity Estimation Tool for Time-Slotted Wireless Networks¡¨, in The Fourth IEEE and IFIP International Conference on wireless and Optical Communications Networks (WOCN'07), Singapore, 2007. (EI)
+
+ 
+
+Ching-Ju Lin, Yi-Ting Chang, and Cheng-Fu Chou,¡¨ Distributed Social-based Overlay Adaptation for Unstructured P2P Networks¡¨, 10th IEEE Global Internet Symposium (in conjunction with IEEE INFOCOM'07), May 2007.
+
+ 
+
+Ching-Ju Lin and Cheng-Fu Chou, "Route-Aware Load-Balanced Resource Allocation for Wireless Mesh Networks," in IEEE Wireless Communication and Networking Conference (WCNC), Mar. 2007, Hong Kong.
+
+ 
+
+Wei-Cheng Xiao, Ling-Jyh Chen, Shih-Hsuan Tang and Cheng-Fu Chou, "VIP: a Virtual Interface-based Approach for Vertical Handover in Single-subnet Networks," in IEEE 21st International Conference on Advanced Information Networking and Applications (AINA-07), May. 2007, Niagara Falls, Canada.
+
+ 
+
+Cheng-Fu Chou, Ling-Jyh Chen, and Wen-Hui Chiang,¡¨ Integrity-aware Bandwidth Guarding Approach in P2P Networks¡¨, IFIP Networking 2007, Atlanta, Georgia, USA, 2006. (also in LNCS, Springer 2007) (Acceptance Rate: 22.5%, 99/440) (SCIE, EI)
+
+ 
+
+Din-Yuen Chan, Wei-Ta Chien, Chun-Yuan Chang, Cheng-Fu Chou, Ching-Ju Lin and Junn-Yen Hu, "A Fast and Accurate Characteristic-Based Rate-Quantization Model for Video Transmission," Proceedings of SPIE Symposium on Electronic Imaging, Visual Communication and Image Processing (VCIP2007), San Jose, CA, Jan., 2007 .(EI)
+
+ 
+
+Chun-Yuan Chang, Cheng-Fu Chou and Din-Yuen Chan, ¡¨A Novel Rate-Quantization Source Modeling Framework for H.264/AVC,¡¨ International Conference on Acoustics, Speech, and Signal Processing, (ICASSP¡¦07), Honolulu, Hawaii, USA, April, 2007. (EI)
+
+ 
+
+Chun-Yuan Chang, Ming-Hung Chen, Cheng-Fu Chou and Din-Yuen Chan, ¡§A Two-Layer Characteristic-based Rate Control Framework for Low Delay Video Transmission," IEEE International Conference on Communications, ICC'07, Jun. 24-27, 2007. (EI)
+
+ 
+
+Wei-Cheng Xiao, Shih-Hsuan, Ling-Jyh Chen, and Cheng-Fu Chou,¡¨A Novel Seamless Vertical Handoff Solution¡¨, The 26th IEEE International Conference on Consumer Electronics (ICCE'07), Las Vegas, USA. (Short paper)
+
+ 
+
+Cheng-Fu Chou and Hsien-Ping Suen, ¡¦Topology-Control-based QoS Routing (TLQR) in Wireless Ad Hoc Networks¡¦, in the Proceeding of The 17th Annual IEEE International Symposium on Personal, Indoor and Mobile Radio Communications(PIMRC), Sep., 2006, Finland.
+
+ 
+
+Wen-Hui Chiang, Wei-Cheng Xiao, and Cheng-Fu Chou, ¡¦A Performance Study of VoIP Applications: MSN vs. Skype¡¦ in the proceedings of 2006 IEEE ICC MultiComm wokshop First Multimedia Communications Workshop, Jun. 2006, Turkey.
+
+ 
+
+Cheng-Fu Chou, Ming-Wei Hsu, and Ching-Ju Lin, ¡¦A trend-loss-density-based differential scheme in wired-cum-wireless networks,¡¦ in International Wireless Communications and Mobile Computing Conference (IWCMC), 2006, Vancouver, Canada.
+
+ 
+
+Ching-Ju Lin, Po-Lin Chou, and Cheng-Fu Chou, ¡¦HCDD: Hierarchical Cluster- based Data Dissemination in Wireless Sensor Networks with Mobile Sink,¡¦ in International Wireless Communications and Mobile Computing Conference (IWCMC), Jul. 2006, Vancouver, Canada.
+
+ 
+
+C.F. Chou, and K.T. Chaung, ¡§CoLaNet: A Cross-Layer Design of Energy-Efficient Wireless Sensor Networks¡¨, in the Proceedings of IEEE International Conference on Sensor Networks, Canada, Aug. 2005.
+
+ 
+
+C.-F. Chou, C. -J. Lin, and C.-C. Tsai, ¡§Traffic-aware Resource Management Schemes in Heterogeneous Wireless Cellular Networks¡¦¡¦, in the Proceedings of IEEE International Conference on Wireless Networks, Communications, and Mobile Computing (WirelessCom 2005), Maui, Hawaii, USA,  June 2005.
+
+ 
+
+C. -J. Lin, C.-F. Chou, Y.-H. Ni, and H.-P. Suen, ¡§Cooperative Popularity-Aware MPEG-4/MPEG-7 Streaming Proxy System¡¦¡¦, to appear in the Proceedings of the 10th IEEE International Symposium on Consumer Electronics (ISCE 2005), Macau, June 2005.
+
+ 
+
+W.-C. Xiao, P.-L. Chou, T. L. Hsu and C.-F. Chou,¡§Enhancing the Performance of Multi-Source Streaming System Using the MCMCF-Based Algorithm¡¨, in the Proceedings of the 10th IEEE International Symposium on Consumer Electronics (ISCE 2005), Macau, June 2005.
+
+ 
+
+J.-Y. Chen, C.-F. Chou, and M.-W. Hsu, ¡§An Implementation of End-to-End Controlled Streaming System Using Similarity-based Frame Discarding Approach on DiffServ¡¦¡¦, 6 pages, in the Proceedings of the 10th IEEE International Symposium on Consumer Electronics (ISCE 2005), Macau, June 2005.
+
+ 
+
+C.-F. Chou, J.-J. Su, and C.-Y Chen, ¡§Straight Line Routing Algorithm for Wireless Sensor Networks¡¦¡¦, 6 pages, in the Proceedings of the 10th IEEE Symposium on Computers and Communications (ISCC 2005), Cartagena, Murcia, Spain, June 2005.
+
+ 
+
+N. Weston, C.-L. Yang, C.-F. Chou, and C.-Y Chen, ¡§LBR: A Level-Based Routing Protocol for Large, Energy Constrained Sensor Networks¡¦¡¦, in the Proceeding of IEEE EEE05 Wokrshop: Mobility, Agents and Mobile Services, March 2005.
+
+ 
+
+Leslie Cheung, Cheng-Fu Chou, Leana Golubchik, Yan Yang, ¡§A Fault Tolerance Protocol For Uploads: Design and Evaluation¡¨, 2nd International Symposium on Parallel and Distributed Processing and Applications, Hong Kong, China, 13?{15 Dec. 2004
+
+ 
+
+C. J. Lin, C.-F. Chou, ``Design of Hybrid Wireless LAN'', in 12th IEEE International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems, Amsterdam, Netherlands, Oct. 2004,
+
+ 
+
+Eric H.K. Wu, H.T. Lai, M.F. Tsai, C.F. Chou, ¡§Low Latency and Efficient Packet Scheduling for Streaming Applications¡¨ IEEE ICC 2004, Paris, France, June 2004
+
+ 
+
+W. C. Cheng, L. Cheung, C.F. Chou, L. Golubchik, Y. Yang, `` Scalable and Secure Data Collection: Fault Tolerance Considerations '' In Proceedings of the 3rd National Conference on Digital Government Research, Los Angeles, California, May 2004.
+
+              
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, S. Khuller, and J. Y.C. Wan, ``Large-scale Data Collection: a Coordinated Approach'', IEEE INFOCOM 2003, San Francisco, California, March-April 2003.
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik: ``Performance of Batch-based Digital Signatures'' To appear in The Tenth IEEE/ACM International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems.Oct. 2002, Fort Worth, Texas.
+
+ 
+
+C.-F. Chou, J. Y.C. Wan, W. C. Cheng, L. Golubchik, and S. Khuller. ``A Performance Study of a Large-scale Data Collection Problem.'' To appear in Proceedings of the 7th International Workshop on Web Content Caching and Distribution, Boulder, Colorado, August 2002.
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, S. Khuller, and J. Y.C. Wan. ``Scalable and Secure Data Collection Using Bistro.'' In Proceedings of the 2nd National Conference on Digital Government Research, Los Angeles, California, May 2002.
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, and S. Khuller. ``A Secure and Scalable Wide-Area Upload Service.'' In Proceedings of the 2nd International Conference on Internet Computing, Vol. 2, pages 733-739, Las Vegas, Nevada, June 25-28, 2001.
+
+ 
+
+W. C. Cheng, C.-F. Chou, L. Golubchik, S. Khuller, and H. Samet. ``Scalable Data Collection for Internet-based Digital Government Applications.'' In Proceedings of the 1st National Conference on Digital Government Research, pages 108-113, Los Angeles, California, May 2001.
+
+ 
+
+C.F. Chou, L. Golubchik,and J. C.S. Lui ``A Performance Study of Dynamic Replicatin Techniques in Continuous Media Servers'', Proceeding of the 8th International Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication Systems (IEEE MASCOTS), August 2000
+
+ 
+
+C.F. Chou, L. Golubchik,and J. C.S. Lui ``Striping doesn't Scale: How to Achieve Scalability for Continuous Media Servers with Replications'',Proceeding of the 20th International Conference on Distributed Computing Systems (IEEE ICDCS), April 2000
+
+ 
+
+C.F. Chou, L. Golubchik,and J. C.S. Lui ``A Performance Study of Dynamic Replicatin Techniques in Continuous Media Servers. In Proceedings of the ACM SIGMETRICS Conference, May 1999, pp. 202-203.

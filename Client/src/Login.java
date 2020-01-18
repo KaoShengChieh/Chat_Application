@@ -1,15 +1,9 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Image;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.awt.Button;
-import java.awt.SystemColor;
 import javax.swing.JTextField;
-import javax.swing.JSeparator;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
@@ -23,7 +17,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import java.sql.SQLException;
 

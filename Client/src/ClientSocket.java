@@ -66,6 +66,7 @@ public class ClientSocket
 			inputObject = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
 			this.close("Fail to connect server");
+			return;
 		}
 		
 		localCache.setOnlineBySocket(serverAddress);

@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.format.DateTimeFormatter;  
 import java.time.LocalDateTime;  
 import java.util.List;
 import java.util.ArrayList;
@@ -83,7 +82,8 @@ public class LocalCache implements ProxyServer
 	
 	public void setOfflineBySocket() {
 		socketIsAlive = false;
-		view.getOffline();
+		if (view != null)
+			view.getOffline();
 	}
 	
 	public boolean autoLogIn() throws SQLException {
@@ -450,7 +450,6 @@ public class LocalCache implements ProxyServer
 	}
 	
 	private void recvFile(Message message) throws SQLException {
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
    		LocalDateTime now = LocalDateTime.now(); 
 		message.timestamp = now.toString();
 

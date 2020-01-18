@@ -1,18 +1,12 @@
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Image;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.awt.Button;
-import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.Font;
@@ -21,9 +15,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JScrollBar;
 import java.sql.SQLException;
 
 public class AddFriend extends JFrame implements View {

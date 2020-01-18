@@ -1,14 +1,7 @@
 import javax.swing.JPanel;
-
 import java.util.List;
-
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -16,10 +9,12 @@ import java.sql.SQLException;
 
 public class testPanel extends JPanel implements View{
 	private static final long serialVersionUID = 1L;
-	private ProxyServer localCache;
+	
 	private List<Pair<User, Message>> myFriends;
 	private int num;
 	private JButton btnFriend[];
+	private ProxyServer localCache;
+	
 	/**
 	 * Create the panel.
 	 */

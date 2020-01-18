@@ -1,29 +1,19 @@
 import java.awt.EventQueue;
-import java.awt.Image;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-
 import java.awt.Color;
-import java.awt.Button;
 import java.awt.SystemColor;
 import javax.swing.JTextField;
-import javax.swing.JSeparator;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.sql.SQLException;
 import java.util.List;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
 import javax.swing.UIManager;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -187,20 +177,7 @@ public class ChatBox extends JFrame implements View{
 	{
 		//Get the data you want to send.
 		String sendMessage = textFieldSend.getText().toString();
-		boolean sent = localCache.sendMessage(friend, sendMessage);
-		if (sent) {
-			//Store the data.
-			byte data[] = sendMessage.getBytes();
-			//Display the message to the chat box if you send it to your friend.
-			//textAreaChat.append("(" + "time" + ")Me: " + "\n" + sendMessage +"\n\n");
-			//Let the scroll bar to the bottom.
-			//textAreaChat.setCaretPosition(textAreaChat.getText().length());
-			//Send the message.
-			//textFieldSend.setText("");
-		}
-		else {
-			JOptionPane.showMessageDialog(null, "Failed!");
-		}
+		localCache.sendMessage(friend, sendMessage);
 	}
 	
 	public void Function_SendFile()

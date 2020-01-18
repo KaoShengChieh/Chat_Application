@@ -1,13 +1,8 @@
-import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Image;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
-import java.awt.Button;
-import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
@@ -18,16 +13,10 @@ import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Alignment;
-
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 public class FriendMsg extends JFrame implements View{
@@ -37,11 +26,9 @@ public class FriendMsg extends JFrame implements View{
 	 */
 	//private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
-	private JPasswordField passwordField;
+	private int xx,xy;
 	private ProxyServer localCache;
 	
-	int xx,xy;
 
 	/**
 	 * Launch the application.

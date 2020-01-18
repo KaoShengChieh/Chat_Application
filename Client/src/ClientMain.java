@@ -41,8 +41,10 @@ public class ClientMain extends JFrame implements View {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private ProxyServer localCache;
+	private boolean connected;
 	String Name = "Ricky";
 	String Password = "123456";
+	private JLabel lblReconnect;
 	
 	int xx,xy;
 
@@ -106,6 +108,27 @@ public class ClientMain extends JFrame implements View {
 		lblAddfriend.setHorizontalAlignment(SwingConstants.CENTER);
 		lblAddfriend.setForeground(new Color(241, 57, 83));
 		lblAddfriend.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		
+		lblReconnect = new JLabel("");
+		lblReconnect.setIcon(new ImageIcon(ClientMain.class.getResource("image/web-icon.png")));
+		lblReconnect.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				try {
+					connected = localCache.reconnect();
+					if (connected)
+						lblReconnect.setVisible(false);
+				} catch (SQLException e) {
+					setErrorMessage(e.getMessage());
+				}
+			}
+		});
+		lblReconnect.setHorizontalAlignment(SwingConstants.CENTER);
+		lblReconnect.setForeground(new Color(241, 57, 83));
+		lblReconnect.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblReconnect.setBounds(0, 358, 48, 71);
+		lblReconnect.setVisible(false);
+		panel.add(lblReconnect);
 		
 		JLabel lblLogout = new JLabel("");
 		lblLogout.setIcon(new ImageIcon(ClientMain.class.getResource("image/logout.png")));
@@ -253,7 +276,10 @@ public class ClientMain extends JFrame implements View {
 		myPanel.setLayout(gl_FriendsJPanel);
 	}
 	
-	public void getOffline(){}
+	public void getOffline() {
+		connected = false;
+		lblReconnect.setVisible(true);
+	}
 	public void newMessage(Message message){}
 	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {

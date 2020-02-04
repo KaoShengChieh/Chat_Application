@@ -18,50 +18,22 @@ import javax.swing.UIManager;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class ChatBox extends JFrame implements View{
-
-	/**
-	 * 
-	 */
+public class ChatBox extends JFrame {
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 
-	 */
+	
 	private JPanel contentPane;
-	private ProxyServer localCache;
-	private User friend;
 	private JTextField textFieldSend;
 	private JTextArea textAreaChat;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ProxyServer localCache = new LocalCache();
-					//not sure if it's right
-					User friend = new User(1, "Ricky");
-					ChatBox frame = new ChatBox(localCache, friend);
-					//frame.setUndecorated(true);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
-	
-	
+	private ProxyServer localCache;
+	private User friend;
 
 	/**
 	 * Create the frame.
 	 */
 	public ChatBox(ProxyServer localCache, User friend) {
-		this.localCache = localCache;
-		localCache.changeView(this);
+		// TODO something wrong here
+		//this.localCache = localCache;
+		//localCache.changeView(this);
 		this.friend = friend;
 		
 		setBackground(Color.WHITE);

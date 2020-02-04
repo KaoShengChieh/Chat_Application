@@ -17,43 +17,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 
-public class AddFriend extends JFrame implements View {
+public class AddFriend extends View {
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 
-	 */
-	//private static final long serialVersionUID = 1L;
+	
 	private JPanel contentPane;
-	
-	int xx,xy;
 	private JTextField SearchFriend;
-	private ProxyServer localCache;
-
-	/**
-	 * Launch the application.
-	 */ /*
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AddFriend frame = new AddFriend();
-					frame.setUndecorated(true);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}*/
-	
-	
-	// going to borrow code from a gist to move frame.
-	
+	private int xx,xy;
 
 	/**
 	 * Create the frame.
 	 */
-	public AddFriend(ProxyServer localCache) {
+	public AddFriend() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 406, 476);
@@ -62,9 +36,6 @@ public class AddFriend extends JFrame implements View {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
-		this.localCache = localCache;
-		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 102, 204));
@@ -76,10 +47,7 @@ public class AddFriend extends JFrame implements View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				AddFriend addFriend = new AddFriend(localCache);
-				addFriend.setVisible(true);
-				setVisible(false);
-				dispose();
+				changeTo(ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(AddFriend.class.getResource("image/userAdd.png")));
@@ -98,10 +66,7 @@ public class AddFriend extends JFrame implements View {
 				if (action == 0) {
 					try {
 						localCache.logOut();
-						Login login = new Login(localCache);
-						login.setVisible(true);
-						setVisible(false);
-						dispose();
+						changeTo(ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -119,10 +84,7 @@ public class AddFriend extends JFrame implements View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				FriendMsg chats = new FriendMsg(localCache);
-				chats.setVisible(true);
-				setVisible(false);
-				dispose();
+				changeTo(ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);

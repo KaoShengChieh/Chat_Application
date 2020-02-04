@@ -10,17 +10,15 @@ public class ChatApp {
 			public void run() {
 				try {
 					ProxyServer localCache = new LocalCache();
-					Login frame = new Login(localCache);
+					ViewFactory.setProxyServer(localCache);
 					
+					View frame = ViewFactory.getView(ViewType.LOGIN);
 					frame.setUndecorated(true);
 					frame.setVisible(true);
 					
 					try {
 						if (localCache.autoLogIn()) {
-							ClientMain main = new ClientMain(localCache);
-							main.setVisible(true);
-							frame.setVisible(false);
-							frame.dispose();
+							frame.changeTo(ViewType.PROFILE);
 							return;
 						}
 					} catch (SQLException e) {

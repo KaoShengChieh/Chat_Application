@@ -52,6 +52,7 @@ check_jdk_version
 CC=javac
 DEBUG=-Xlint
 SRC=src/*.java
+GUI=src/GUI/*.java
 DEST=bin
 
 case "$OSTYPE" in
@@ -66,5 +67,5 @@ case "$OSTYPE" in
   	exit 1 ;;
 esac
 
-$CC $DEBUG -cp $CP $SRC -d $DEST
+$CC $DEBUG -cp $CP $SRC $GUI -d $DEST
 

@@ -16,44 +16,19 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class Register extends JFrame implements View {
+public class Register extends View {
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 
-	 */
+	
 	private JPanel contentPane;
 	private JTextField textField;
 	private JPasswordField passwordField;
 	private JPasswordField passwordField_1;
-	private ProxyServer localCache;
-	
-	int xx,xy;
-
-	/**
-	 * Launch the application.
-	 */ /*
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Register frame = new Register();
-					frame.setUndecorated(true);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}*/
-	
-	
-	// going to borrow code from a gist to move frame.
-	
+	private int xx,xy;
 
 	/**
 	 * Create the frame.
 	 */
-	public Register(ProxyServer localCache) {
+	public Register() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 729, 476);
@@ -62,9 +37,6 @@ public class Register extends JFrame implements View {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
-		this.localCache = localCache;
-		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(153, 0, 51));
@@ -124,10 +96,7 @@ public class Register extends JFrame implements View {
 					if (signUpSuccessful) {
 						JOptionPane.showMessageDialog(null, "Successfully Registered!");
 
-						Login login = new Login(localCache);
-						login.setVisible(true);
-						setVisible(false);
-						dispose();
+						changeTo(ViewType.LOGIN);
 					}
 				}
 				else {

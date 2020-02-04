@@ -62,7 +62,6 @@ public interface ProxyServer {
 	 */
 	void quit();
 	
-	
 	void changeView(View view);
 	
 	String getUserName();

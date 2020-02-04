@@ -1,0 +1,3 @@
+public enum ViewType {
+	LOGIN, REGISTER, PROFILE, FRIEND_LIST, ADD_FRIEND
+}

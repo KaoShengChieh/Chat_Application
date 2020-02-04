@@ -7,7 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
 
-public class testPanel extends JPanel implements View{
+public class testPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
 	private List<Pair<User, Message>> myFriends;
@@ -22,8 +22,9 @@ public class testPanel extends JPanel implements View{
 		setBackground(new Color(0, 102, 153));
 		setLayout(null);
 		
-		this.localCache = localCache;
-		localCache.changeView(this);
+		// TODO something wrong here
+		//this.localCache = localCache;
+		//localCache.changeView(this);
 		try {
 			myFriends = localCache.getFriendList();
 		} catch (SQLException exception) {

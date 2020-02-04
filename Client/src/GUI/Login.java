@@ -21,19 +21,12 @@ import javax.swing.JCheckBox;
 import java.sql.SQLException;
 
 //https://github.com/YUbuntu0109/Instant-messaging-software---Java-swing/blob/master/Instant%20messaging%20software%20-%20MyQQ/Source/Document.txt
-public class Login extends JFrame implements View {
-
-	/**
-	 * 
-	 */
+public class Login extends View {
 	private static final long serialVersionUID = 1L;
-	/**
-	 * 
-	 */
+	
 	private JPanel contentPane;
 	private JTextField textField;
 	private JPasswordField passwordField;
-	private ProxyServer localCache;
 	private JCheckBox chckbxAutologin;
 	private boolean autoLogin = false;
 	private int xx,xy;
@@ -44,7 +37,7 @@ public class Login extends JFrame implements View {
 	/**
 	 * Create the frame.
 	 */
-	public Login(ProxyServer localCache) {
+	public Login() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 729, 476);
@@ -53,9 +46,6 @@ public class Login extends JFrame implements View {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		
-		this.localCache = localCache;
-		localCache.changeView(this);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(0, 0, 51));
@@ -104,10 +94,7 @@ public class Login extends JFrame implements View {
 		Button btnRegister = new Button("Register");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Register register = new Register(localCache);
-				register.setVisible(true);
-				setVisible(false);
-				dispose();
+				changeTo(ViewType.REGISTER);
 			}
 		});
 		btnRegister.setForeground(new Color(255, 0, 102));
@@ -168,10 +155,7 @@ public class Login extends JFrame implements View {
 				}
 				
 				if (logInSuccessful) {
-					ClientMain main = new ClientMain(localCache);
-					main.setVisible(true);
-					setVisible(false);
-					dispose();
+					changeTo(ViewType.PROFILE);
 				}
 			}
 		});

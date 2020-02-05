@@ -1,9 +1,9 @@
 public class User {
 	public int ID;
-	public String Name;
+	public String name;
 	
 	public User(int userID, String userName) {
 		this.ID = userID;
-		this.Name = userName;
+		this.name = userName;
 	}
 }

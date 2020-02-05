@@ -331,6 +331,8 @@ public class LocalCache implements ProxyServer
 		userID = -1;
 		userName = null;
 		sendQueue.push(new Packet(Packet.Type.LOG_OUT, null));
+		
+		ViewFactory.singletonViewMap.clear();
 	}
 	
 	public void quit() {
@@ -344,12 +346,12 @@ public class LocalCache implements ProxyServer
 		this.view = view;
 	}
 	
-	public String getUserName() {
+	public User getUser() {
 		if (userID == -1) {
 			view.setErrorMessage("Not log in yet");
 		}
 		
-		return userName;
+		return new User(userID, userName);
 	}
 	
 	private void update() throws SQLException {

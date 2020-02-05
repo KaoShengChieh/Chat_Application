@@ -1,4 +1,5 @@
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class View extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -12,5 +13,7 @@ public class View extends JFrame {
 	public void getOffline() {}
 	public void newMessage(Message message) {}
 	public void newFriend(User friend) {}
-	public void setErrorMessage(String message) {}
+	public void setErrorMessage(String message) {
+		JOptionPane.showMessageDialog(null, "Error: " + message);
+	}
 }

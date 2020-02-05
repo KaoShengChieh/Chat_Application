@@ -1,25 +1,35 @@
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import java.awt.Color;
-import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.GroupLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import javax.swing.GroupLayout.Alignment;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import javax.swing.border.EmptyBorder;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.HashMap;
+import java.util.Map;
+import java.sql.SQLException;
 
 public class FriendList extends View{
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
+	private JTabbedPane tabbedPane;
+	private Map<Integer, JButton> buttonsMap = new HashMap<>();
+	private Map<Integer, String> friendMap = new HashMap<>();
 	private int xx,xy;
 
 	/**
@@ -135,27 +145,38 @@ public class FriendList extends View{
 		separator.setBounds(93, 96, 273, 12);
 		contentPane.add(separator);
 		
-		JLabel label = new JLabel("");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setForeground(new Color(241, 57, 83));
-		label.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		label.setBounds(681, -11, 48, 71);
-		contentPane.add(label);
-		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBackground(Color.WHITE);
 		tabbedPane.setBounds(60, 107, 327, 359);
 		contentPane.add(tabbedPane);
 		
+		setFriendListPanel();
+	}
+	
+	public void setFriendListPanel() {
 		JPanel FriendsListJPanel = new JPanel();
 		FriendsListJPanel.setBackground(Color.WHITE);
+		tabbedPane.removeAll();
 		tabbedPane.addTab("Chats", null, FriendsListJPanel, null);
 		
-		
 		JScrollPane FriendScrollPane = new JScrollPane();
-		//FriendsJPanel.add(FriendScrollPane);
+		JPanel friendsJPanel = new JPanel();
 		
-		testPanel friendsJPanel = new testPanel(proxyServer);
+		List<Pair<User, Message>> myFriends = null;
+		ListIterator<Pair<User, Message>> itr = null;
+		JButton friendButton = null;
+		
+		try {
+			myFriends = proxyServer.getFriendList();
+			itr = myFriends.listIterator();
+			while (itr.hasNext()) {
+				friendButton = getFriendButton(itr.next());
+				friendsJPanel.add(friendButton);
+			}
+		} catch (SQLException exception) {
+			setErrorMessage(exception.getMessage());
+		}
+		
 		FriendScrollPane.setViewportView(friendsJPanel);
 		
 		GroupLayout gl_FriendsJPanel = new GroupLayout(FriendsListJPanel);
@@ -169,10 +190,55 @@ public class FriendList extends View{
 		);
 		FriendsListJPanel.setLayout(gl_FriendsJPanel);
 	}
-	public void getOffline(){}
-	public void newMessage(Message message){}
-	public void newFriend(User friend){}
-	public void setErrorMessage(String message) {
-		JOptionPane.showMessageDialog(null, "Error: " + message);
+	
+	private JButton getFriendButton(Pair<User, Message> friend) {
+		int friendID = friend.first.ID;
+		String friendName = friend.first.name;
+		String timestamp = "";
+		String latestMsg = "";
+		
+		if (friend.second != null) {
+			latestMsg = friend.second.content;
+			timestamp = friend.second.timestamp;
+		}
+		
+		JButton friendButton = new JButton(getButtonText(friendName, timestamp, latestMsg));
+		friendButton.setPreferredSize(new Dimension(290, 100));
+		
+		friendButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ChatBox chatbox = new ChatBox(friend.first);
+				chatbox.setVisible(true);
+			}
+		});
+		
+		buttonsMap.put(friendID, friendButton);
+		friendMap.put(friendID, friendName);
+		
+		return friendButton;
+	}
+	
+	private String getButtonText(String name, String timestamp, String content) {
+		String text = name + "\n" + timestamp + "\n" + content;
+		
+		text = "<html>" + text + "</html>";
+	 	text = text.replace("\n", "<br/>").replace(" ", "&nbsp;");
+	 	
+	 	return text;
+	}
+	
+	public void getOffline() {}
+	public void newMessage(Message message) {
+		User myself = proxyServer.getUser();
+		int friendID = message.senderID != myself.ID ? message.senderID : message.receiverID;
+		JButton friendButton = buttonsMap.get(friendID);
+		String friendName = friendMap.get(friendID);
+		
+		friendButton.setText(getButtonText(friendName, message.timestamp, message.content));
+	}
+	
+	public void newFriend(User friend) {
+		//TODO
 	}
 }

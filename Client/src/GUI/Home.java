@@ -1,36 +1,46 @@
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.Color;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Alignment;
-import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import javax.swing.JScrollPane;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 
-public class Profile extends View {
+public class Home extends View {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
 	private boolean connected;
 	private JLabel lblReconnect;
+	private JTabbedPane tabbedPane;
+	private JPanel FriendsListJPanel;
+	private Map<Integer, JButton> buttonsMap = new HashMap<>();
+	private Map<Integer, String> friendMap = new HashMap<>();
 	private int xx,xy;
-	private String Name;
-	private String Password;
 
 	/**
 	 * Create the frame.
 	 */
-	public Profile() {
+	public Home() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 406, 476);
@@ -50,10 +60,10 @@ public class Profile extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(Profile.this, ViewType.ADD_FRIEND);
+				ViewFactory.changeView(Home.this, ViewType.ADD_FRIEND);
 			}
 		});
-		lblAddfriend.setIcon(new ImageIcon(Profile.class.getResource("image/userAdd.png")));
+		lblAddfriend.setIcon(new ImageIcon(Home.class.getResource("image/userAdd.png")));
 		lblAddfriend.setBounds(0, 112, 48, 71);
 		panel.add(lblAddfriend);
 		lblAddfriend.setHorizontalAlignment(SwingConstants.CENTER);
@@ -61,7 +71,7 @@ public class Profile extends View {
 		lblAddfriend.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		
 		lblReconnect = new JLabel("");
-		lblReconnect.setIcon(new ImageIcon(Profile.class.getResource("image/web-icon.png")));
+		lblReconnect.setIcon(new ImageIcon(Home.class.getResource("image/web-icon.png")));
 		lblReconnect.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -82,7 +92,7 @@ public class Profile extends View {
 		panel.add(lblReconnect);
 		
 		JLabel lblLogout = new JLabel("");
-		lblLogout.setIcon(new ImageIcon(Profile.class.getResource("image/logout.png")));
+		lblLogout.setIcon(new ImageIcon(Home.class.getResource("image/logout.png")));
 		lblLogout.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -90,7 +100,7 @@ public class Profile extends View {
 				if (action == 0) {
 					try {
 						proxyServer.logOut();
-						ViewFactory.changeView(Profile.this, ViewType.LOGIN);
+						ViewFactory.changeView(Home.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -104,11 +114,11 @@ public class Profile extends View {
 		panel.add(lblLogout);
 		
 		JLabel lblMsg = new JLabel("");
-		lblMsg.setIcon(new ImageIcon(Profile.class.getResource("image/message.png")));
+		lblMsg.setIcon(new ImageIcon(Home.class.getResource("image/message.png")));
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(Profile.this, ViewType.FRIEND_LIST);
+				ViewFactory.changeView(Home.this, ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -120,7 +130,7 @@ public class Profile extends View {
 		JLabel lblClose = new JLabel("");
 		lblClose.setBounds(0, 6, 48, 71);
 		panel.add(lblClose);
-		lblClose.setIcon(new ImageIcon(Profile.class.getResource("image/clientX.png")));
+		lblClose.setIcon(new ImageIcon(Home.class.getResource("image/clientX.png")));
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -148,19 +158,19 @@ public class Profile extends View {
 				
 				int x = arg0.getXOnScreen();
 	            int y = arg0.getYOnScreen();
-	            Profile.this.setLocation(x - xx, y - xy);  
+	            Home.this.setLocation(x - xx, y - xy);  
 			}
 		});
 		lblImg.setBounds(-97, -2, 552, 281);
 		lblImg.setVerticalAlignment(SwingConstants.TOP);
 		
-		JLabel lblFriendList = new JLabel("Friend List");
-		lblFriendList.setBackground(new Color(0, 102, 204));
-		lblFriendList.setBounds(83, 25, 283, 71);
-		contentPane.add(lblFriendList);
-		lblFriendList.setForeground(new Color(0, 0, 51));
-		lblFriendList.setFont(new Font("Yuppy TC", Font.PLAIN, 48));
-		lblFriendList.setHorizontalAlignment(SwingConstants.CENTER);
+		JLabel lblHome = new JLabel("Home");
+		lblHome.setBackground(new Color(0, 102, 204));
+		lblHome.setBounds(83, 25, 283, 71);
+		contentPane.add(lblHome);
+		lblHome.setForeground(new Color(0, 0, 51));
+		lblHome.setFont(new Font("Yuppy TC", Font.PLAIN, 48));
+		lblHome.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		JSeparator separator = new JSeparator();
 		separator.setBounds(93, 96, 273, 12);
@@ -173,43 +183,73 @@ public class Profile extends View {
 		label.setBounds(681, -11, 48, 71);
 		contentPane.add(label);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBackground(Color.WHITE);
 		tabbedPane.setBounds(60, 107, 327, 359);
 		contentPane.add(tabbedPane);
 		
-		JPanel InfoJPanel = new JPanel();
-		InfoJPanel.setBackground(Color.WHITE);
-		tabbedPane.addTab("Profile", null, InfoJPanel, null);
+		JPanel profilePanel = new JPanel();
+		profilePanel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Profile", null, profilePanel, null);
 		
 		//get my name and password, need fix
-		Name = proxyServer.getUserName();
-		Password = "才不告訴承滿的哥哥";
+		String Name = proxyServer.getUser().name;
+		String Password = "才不告訴承滿的哥哥";
 		
 		JLabel myName = new JLabel("My Name: " + Name);
 		myName.setHorizontalAlignment(SwingConstants.CENTER);
 		myName.setForeground(Color.RED);
 		myName.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 30));
 		myName.setBackground(new Color(0, 102, 204));
-		InfoJPanel.add(myName);
+		profilePanel.add(myName);
 		
 		JLabel myPassword = new JLabel("Password: " + Password);
 		myPassword.setHorizontalAlignment(SwingConstants.CENTER);
 		myPassword.setForeground(Color.ORANGE);
 		myPassword.setFont(new Font("Aloisen Groove Text", Font.PLAIN, 23));
 		myPassword.setBackground(new Color(0, 102, 204));
-		InfoJPanel.add(myPassword);
+		profilePanel.add(myPassword);
 		
-		JPanel myPanel = new JPanel();
-		myPanel.setBackground(Color.WHITE);
-		tabbedPane.addTab("Friends", null, myPanel, null);
+		FriendsListJPanel = new JPanel();
+		FriendsListJPanel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Friends", null, FriendsListJPanel, null);
 		
+		tabbedPane.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (tabbedPane.getSelectedIndex() == 0) {
+					tabbedPane.remove(1);
+					tabbedPane.addTab("Friends", null, FriendsListJPanel, null);
+				} else if (tabbedPane.getSelectedIndex() == 1) {
+					setFriendListPanel();
+				}
+			}
+		});
+	}
+	
+	private void setFriendListPanel() {
 		JScrollPane FriendScrollPane = new JScrollPane();
-		myPanel.add(FriendScrollPane);
+		FriendsListJPanel.add(FriendScrollPane);
 		
-		FriendScrollPane.setViewportView(new testPanel(proxyServer));
+		JPanel friendsJPanel = new JPanel();
 		
-		GroupLayout gl_FriendsJPanel = new GroupLayout(myPanel);
+		List<Pair<User, Message>> myFriends = null;
+		ListIterator<Pair<User, Message>> itr = null;
+		JButton friendButton = null;
+		
+		try {
+			myFriends = proxyServer.getFriendList();
+			itr = myFriends.listIterator();
+			while (itr.hasNext()) {
+				friendButton = getFriendButton(itr.next());
+				friendsJPanel.add(friendButton);
+			}
+		} catch (SQLException exception) {
+			setErrorMessage(exception.getMessage());
+		}
+		
+		FriendScrollPane.setViewportView(friendsJPanel);
+		
+		GroupLayout gl_FriendsJPanel = new GroupLayout(FriendsListJPanel);
 		gl_FriendsJPanel.setHorizontalGroup(
 			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
 				.addComponent(FriendScrollPane, GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
@@ -218,14 +258,40 @@ public class Profile extends View {
 			gl_FriendsJPanel.createParallelGroup(Alignment.LEADING)
 				.addComponent(FriendScrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 313, Short.MAX_VALUE)
 		);
-		myPanel.setLayout(gl_FriendsJPanel);
+		FriendsListJPanel.setLayout(gl_FriendsJPanel);
+	}
+	
+	private JButton getFriendButton(Pair<User, Message> friend) {
+		int friendID = friend.first.ID;
+		String friendName = friend.first.name;
+		String timestamp = "";
+		String latestMsg = "";
+		
+		if (friend.second != null) {
+			latestMsg = friend.second.content;
+			timestamp = friend.second.timestamp;
+		}
+		
+		JButton friendButton = new JButton(friendName);
+		friendButton.setPreferredSize(new Dimension(290, 100));
+		
+		friendButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ChatBox chatbox = new ChatBox(friend.first);
+				chatbox.setVisible(true);
+			}
+		});
+		
+		buttonsMap.put(friendID, friendButton);
+		friendMap.put(friendID, friendName);
+		
+		return friendButton;
 	}
 	
 	public void getOffline() {
 		connected = false;
 		lblReconnect.setVisible(true);
 	}
-	public void setErrorMessage(String message) {
-		JOptionPane.showMessageDialog(null, "Error: " + message);
-	}
 }
+

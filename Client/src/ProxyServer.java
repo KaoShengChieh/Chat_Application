@@ -64,5 +64,5 @@ public interface ProxyServer {
 	
 	void changeView(View view);
 	
-	String getUserName();
+	User getUser();
 }

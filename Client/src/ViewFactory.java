@@ -2,7 +2,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 public class ViewFactory {
-	private static Map<ViewType, View> singletonViewMap = new EnumMap<>(ViewType.class);
+	static Map<ViewType, View> singletonViewMap = new EnumMap<>(ViewType.class);
 	
 	public static void setProxyServer(ProxyServer proxyServer) {
 		View.proxyServer = proxyServer;
@@ -19,7 +19,7 @@ public class ViewFactory {
 					view = new Register();
 					break;
 				case PROFILE:
-					view = new Profile();
+					view = new Home();
 					break;
 				case FRIEND_LIST:
 					view = new FriendList();

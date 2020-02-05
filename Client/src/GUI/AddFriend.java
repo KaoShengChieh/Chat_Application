@@ -47,7 +47,7 @@ public class AddFriend extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.ADD_FRIEND);
+				ViewFactory.changeView(AddFriend.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(AddFriend.class.getResource("image/userAdd.png")));
@@ -65,8 +65,8 @@ public class AddFriend extends View {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
 					try {
-						localCache.logOut();
-						changeTo(ViewType.LOGIN);
+						proxyServer.logOut();
+						ViewFactory.changeView(AddFriend.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -84,7 +84,7 @@ public class AddFriend extends View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.FRIEND_LIST);
+				ViewFactory.changeView(AddFriend.this, ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -165,7 +165,7 @@ public class AddFriend extends View {
 				boolean exist  = false;
 				
 				try {
-					exist = localCache.addFriend(friendName);
+					exist = proxyServer.addFriend(friendName);
 				} catch (SQLException ee) {
 					setErrorMessage(ee.getMessage());
 				}
@@ -209,8 +209,6 @@ public class AddFriend extends View {
 	}
 	
 	public void getOffline(){}
-	public void newMessage(Message message){}
-	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {
 		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}

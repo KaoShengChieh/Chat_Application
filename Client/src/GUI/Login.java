@@ -94,7 +94,7 @@ public class Login extends View {
 		Button btnRegister = new Button("Register");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				changeTo(ViewType.REGISTER);
+				ViewFactory.changeView(Login.this, ViewType.REGISTER);
 			}
 		});
 		btnRegister.setForeground(new Color(255, 0, 102));
@@ -149,13 +149,13 @@ public class Login extends View {
 				boolean logInSuccessful = false;
 				
 				try {
-					logInSuccessful = localCache.logIn(username, password, autoLogin);
+					logInSuccessful = proxyServer.logIn(username, password, autoLogin);
 				} catch (SQLException exception) {
 					setErrorMessage(exception.getMessage());
 				}
 				
 				if (logInSuccessful) {
-					changeTo(ViewType.PROFILE);
+					ViewFactory.changeView(Login.this, ViewType.PROFILE);
 				}
 			}
 		});
@@ -181,8 +181,6 @@ public class Login extends View {
 		}
 	}	
 	public void getOffline(){}
-	public void newMessage(Message message){}
-	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {
 		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}

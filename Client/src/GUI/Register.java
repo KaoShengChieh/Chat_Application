@@ -91,12 +91,11 @@ public class Register extends View {
 				boolean signUpSuccessful = false;
 				
 				if (password.equals(passwordConfirm) && !username.equals("")) {
-					signUpSuccessful = localCache.signUp(username, password);
+					signUpSuccessful = proxyServer.signUp(username, password);
 					
 					if (signUpSuccessful) {
 						JOptionPane.showMessageDialog(null, "Successfully Registered!");
-
-						changeTo(ViewType.LOGIN);
+						ViewFactory.changeView(Register.this, ViewType.LOGIN);
 					}
 				}
 				else {
@@ -161,8 +160,6 @@ public class Register extends View {
 	}
 	
 	public void getOffline(){}
-	public void newMessage(Message message){}
-	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {
 		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}

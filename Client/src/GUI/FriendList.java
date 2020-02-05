@@ -1,14 +1,11 @@
-import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
-import javax.swing.JTextField;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
@@ -48,7 +45,7 @@ public class FriendList extends View{
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.ADD_FRIEND);
+				ViewFactory.changeView(FriendList.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(FriendList.class.getResource("image/userAdd.png")));
@@ -65,7 +62,7 @@ public class FriendList extends View{
 			public void mouseClicked(MouseEvent arg0) {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
-					changeTo(ViewType.LOGIN);
+					ViewFactory.changeView(FriendList.this, ViewType.LOGIN);
 				}
 			}
 		});
@@ -80,7 +77,7 @@ public class FriendList extends View{
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.PROFILE);
+				ViewFactory.changeView(FriendList.this, ViewType.PROFILE);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -158,7 +155,7 @@ public class FriendList extends View{
 		JScrollPane FriendScrollPane = new JScrollPane();
 		//FriendsJPanel.add(FriendScrollPane);
 		
-		testPanel friendsJPanel = new testPanel(localCache);
+		testPanel friendsJPanel = new testPanel(proxyServer);
 		FriendScrollPane.setViewportView(friendsJPanel);
 		
 		GroupLayout gl_FriendsJPanel = new GroupLayout(FriendsListJPanel);

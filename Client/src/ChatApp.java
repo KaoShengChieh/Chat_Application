@@ -18,7 +18,7 @@ public class ChatApp {
 					
 					try {
 						if (localCache.autoLogIn()) {
-							frame.changeTo(ViewType.PROFILE);
+							ViewFactory.changeView(frame, ViewType.PROFILE);
 							return;
 						}
 					} catch (SQLException e) {

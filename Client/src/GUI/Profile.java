@@ -50,7 +50,7 @@ public class Profile extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.ADD_FRIEND);
+				ViewFactory.changeView(Profile.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(Profile.class.getResource("image/userAdd.png")));
@@ -66,7 +66,7 @@ public class Profile extends View {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				try {
-					connected = localCache.reconnect();
+					connected = proxyServer.reconnect();
 					if (connected)
 						lblReconnect.setVisible(false);
 				} catch (SQLException e) {
@@ -89,8 +89,8 @@ public class Profile extends View {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
 					try {
-						localCache.logOut();
-						changeTo(ViewType.LOGIN);
+						proxyServer.logOut();
+						ViewFactory.changeView(Profile.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -108,7 +108,7 @@ public class Profile extends View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				changeTo(ViewType.FRIEND_LIST);
+				ViewFactory.changeView(Profile.this, ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -183,7 +183,7 @@ public class Profile extends View {
 		tabbedPane.addTab("Profile", null, InfoJPanel, null);
 		
 		//get my name and password, need fix
-		Name = localCache.getUserName();
+		Name = proxyServer.getUserName();
 		Password = "才不告訴承滿的哥哥";
 		
 		JLabel myName = new JLabel("My Name: " + Name);
@@ -207,7 +207,7 @@ public class Profile extends View {
 		JScrollPane FriendScrollPane = new JScrollPane();
 		myPanel.add(FriendScrollPane);
 		
-		FriendScrollPane.setViewportView(new testPanel(localCache));
+		FriendScrollPane.setViewportView(new testPanel(proxyServer));
 		
 		GroupLayout gl_FriendsJPanel = new GroupLayout(myPanel);
 		gl_FriendsJPanel.setHorizontalGroup(
@@ -225,8 +225,6 @@ public class Profile extends View {
 		connected = false;
 		lblReconnect.setVisible(true);
 	}
-	public void newMessage(Message message){}
-	public void newFriend(User friend){}
 	public void setErrorMessage(String message) {
 		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}

@@ -5,8 +5,9 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry excluding="lib/|src/" kind="src" path=""/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="lib/|src/|src/GUI/" kind="src" path=""/>
+	<classpathentry kind="src" path="src/GUI"/>
+	<classpathentry excluding="GUI/" kind="src" path="src"/>
 	<classpathentry kind="src" path="lib"/>
 	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.23.1.jar"/>
 	<classpathentry kind="output" path="bin"/>

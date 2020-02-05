@@ -4,10 +4,10 @@ import java.util.Map;
 public class ViewFactory {
 	private static Map<ViewType, View> singletonViewMap = new EnumMap<>(ViewType.class);
 	
-	public static void setProxyServer(ProxyServer localCache) {
-		View.localCache = localCache;
+	public static void setProxyServer(ProxyServer proxyServer) {
+		View.proxyServer = proxyServer;
 	}
-	
+
 	public static View getView(ViewType type) {
 		if (singletonViewMap.containsKey(type) == false) {
 			View view = null;
@@ -32,5 +32,33 @@ public class ViewFactory {
 			singletonViewMap.put(type, view);
 		}
 		return singletonViewMap.get(type);
+	}
+	
+	public static void changeView(View oldView, ViewType type) {
+		View newView = ViewFactory.getView(type);
+		
+		switch (oldView.type) {
+			case LOGIN: case REGISTER:
+				switch (type) {
+					default:
+						break;
+					case LOGIN: case REGISTER:
+						newView.setBounds(oldView.getBounds());
+
+				}
+				break;
+			case PROFILE: case FRIEND_LIST: case ADD_FRIEND:
+				switch (type) {
+					default:
+						break;
+					case PROFILE: case FRIEND_LIST: case ADD_FRIEND:
+						newView.setBounds(oldView.getBounds());
+				}
+				break;
+		}
+		
+		View.proxyServer.changeView(newView);
+		newView.setVisible(true);
+		oldView.setVisible(false);
 	}
 }

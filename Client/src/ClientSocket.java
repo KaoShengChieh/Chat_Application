@@ -80,15 +80,14 @@ public class ClientSocket
 							send_packet = getPacket();
 							writeSocket(send_packet);
 						} while (send_packet.type != Packet.Type.QUIT);
-						outputIsClosed = true;
 					} catch (IOException e) {
-						outputIsClosed = true;
-		            	if (inputIsClosed == false) {
-                        	close("Disconnected with server: " + e.getMessage());
-                        }
+						close("Disconnected with server: " + e.getMessage());
                     } finally {
-                    	localCache.setOfflineBySocket();
-                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
+						outputIsClosed = true;
+						if (inputIsClosed == false) {
+							recvQueue.push(new Packet(Packet.Type.QUIT, null));
+							localCache.setOfflineBySocket();
+						}
                     }
 				}
 			}).start(); 
@@ -97,21 +96,21 @@ public class ClientSocket
 				public void run() { 
 					Packet recv_packet = null;
 					try {
-						while (true) { 
+						do { 
 							recv_packet = readSocket();
 							setPacket(recv_packet);
-						}
+						} while (recv_packet.type != Packet.Type.QUIT);
 					} catch (IOException e) { 
-                        inputIsClosed = true;
-		            	if (outputIsClosed == false) {
-		                    close("Disconnected with server: " + e.getMessage());
-		                }
+						close("Disconnected with server: " + e.getMessage());
                     } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                        close("Fail to Serialized/Deserialized");
+                        close("Fail to Serialized/Deserialized: " + e.getMessage());
+                        System.exit(0);
                     } finally {
-                    	localCache.setOfflineBySocket();
-                    	recvQueue.push(new Packet(Packet.Type.QUIT, null));
+						inputIsClosed = true;
+						if (outputIsClosed == false) {
+							sendQueue.push(new Packet(Packet.Type.QUIT, null));
+							localCache.setOfflineBySocket();
+						}
                     }
 				} 
 			}).start();

@@ -1,20 +1,20 @@
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import java.awt.Color;
 import java.awt.Button;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 
 public class Register extends View {
 	private static final long serialVersionUID = 1L;
@@ -48,7 +48,7 @@ public class Register extends View {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblTitle.setForeground(new Color(240, 248, 255));
-		lblTitle.setBounds(56, 304, 241, 27);
+		lblTitle.setBounds(39, 304, 278, 27);
 		panel.add(lblTitle);
 		
 		JLabel lblImg = new JLabel("");
@@ -79,7 +79,7 @@ public class Register extends View {
 		lblViseTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblViseTitle.setForeground(new Color(240, 248, 255));
 		lblViseTitle.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblViseTitle.setBounds(100, 343, 153, 27);
+		lblViseTitle.setBounds(87, 343, 181, 27);
 		panel.add(lblViseTitle);
 		
 		Button button = new Button("Register Complete. Login!");
@@ -90,19 +90,19 @@ public class Register extends View {
 				String passwordConfirm = String.valueOf(passwordField_1.getPassword());
 				boolean signUpSuccessful = false;
 				
-				if (password.equals(passwordConfirm) && !username.equals("")) {
+				if (username.equals("")) {
+					JOptionPane.showMessageDialog(null, "Invalid username!");
+				} else if (!password.equals(passwordConfirm)) {
+					JOptionPane.showMessageDialog(null, "Password not matched!");
+					passwordField.setText("");
+					passwordField_1.setText("");
+				} else {
 					signUpSuccessful = proxyServer.signUp(username, password);
 					
 					if (signUpSuccessful) {
 						JOptionPane.showMessageDialog(null, "Successfully Registered!");
 						ViewFactory.changeView(Register.this, ViewType.LOGIN);
 					}
-				}
-				else {
-					JOptionPane.showMessageDialog(null, "Invalid username or password not matched!");
-					textField.setText("");
-					passwordField.setText("");
-					passwordField_1.setText("");
 				}
 			}
 		});
@@ -125,7 +125,7 @@ public class Register extends View {
 		contentPane.add(lblPassword);
 		
 		JLabel lblPasswordConfirm = new JLabel("PASSWORD CONFIRM");
-		lblPasswordConfirm.setBounds(395, 266, 140, 14);
+		lblPasswordConfirm.setBounds(395, 266, 182, 14);
 		contentPane.add(lblPasswordConfirm);
 		
 		passwordField = new JPasswordField();
@@ -141,8 +141,7 @@ public class Register extends View {
 		lbl_close.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				
-				System.exit(0);
+				ViewFactory.changeView(Register.this, ViewType.LOGIN);
 			}
 		});
 		lbl_close.setHorizontalAlignment(SwingConstants.CENTER);
@@ -157,10 +156,5 @@ public class Register extends View {
 		lblRegister.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRegister.setBounds(395, 23, 283, 71);
 		contentPane.add(lblRegister);
-	}
-	
-	public void getOffline(){}
-	public void setErrorMessage(String message) {
-		JOptionPane.showMessageDialog(null, "Error: " + message);
 	}
 }

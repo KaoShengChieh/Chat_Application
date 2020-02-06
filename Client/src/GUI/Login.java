@@ -13,11 +13,11 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import java.sql.SQLException;
 
 //https://github.com/YUbuntu0109/Instant-messaging-software---Java-swing/blob/master/Instant%20messaging%20software%20-%20MyQQ/Source/Document.txt
@@ -57,7 +57,7 @@ public class Login extends View {
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblTitle.setForeground(new Color(240, 248, 255));
-		lblTitle.setBounds(55, 304, 241, 27);
+		lblTitle.setBounds(38, 304, 274, 27);
 		panel.add(lblTitle);
 		
 		JLabel lblImg = new JLabel("");
@@ -88,7 +88,7 @@ public class Login extends View {
 		lblViseTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblViseTitle.setForeground(new Color(240, 248, 255));
 		lblViseTitle.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblViseTitle.setBounds(99, 343, 152, 27);
+		lblViseTitle.setBounds(85, 343, 178, 27);
 		panel.add(lblViseTitle);
 		
 		Button btnRegister = new Button("Register");
@@ -124,8 +124,12 @@ public class Login extends View {
 		lbl_close.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				
-				System.exit(0);
+				if (JOptionPane.showConfirmDialog(Login.this, 
+					"Are you sure you want to exit?", "Exit Application", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+					proxyServer.quit();
+				}
 			}
 		});
 		lbl_close.setHorizontalAlignment(SwingConstants.CENTER);
@@ -169,16 +173,11 @@ public class Login extends View {
 		chckbxAutologin.setBounds(466, 394, 195, 23);
 		contentPane.add(chckbxAutologin);
 		
-		Checked check = new Checked();
-		chckbxAutologin.addItemListener(check);
+		chckbxAutologin.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				// TODO Auto-generated method stub
+				autoLogin = chckbxAutologin.isSelected();
+			}
+		});
 	}
-	public class Checked implements ItemListener {
-	
-		@Override
-		public void itemStateChanged(ItemEvent e) {
-			// TODO Auto-generated method stub
-			autoLogin = chckbxAutologin.isSelected();
-		}
-	}	
-	public void getOffline(){}
 }

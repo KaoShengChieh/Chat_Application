@@ -21,9 +21,24 @@ public interface ProxyServer {
 	boolean signUp(String userName, String password);
 	
 	/*
-	 * Return list of pairs of friend info and most recent message
+	 * Return myself information after login
 	 */
-	List<Pair<User, Message>> getFriendList() throws SQLException;
+	User getUser();
+	
+	/*
+	 * Return user informantion corresponding to userID; 
+	 */
+	User getUser(int userID) throws SQLException;
+	
+	/*
+	 * Return list of pairs of friend info
+	 */
+	List<User> getFriendList() throws SQLException;
+	
+	/*
+	 * Return list of pairs of friend info with most recent message
+	 */
+	List<Pair<User, Message>> getFriendListWithNewestMessage() throws SQLException;
 	
 	/*
 	 * Return true, if add friend successfully
@@ -43,6 +58,10 @@ public interface ProxyServer {
 	 */
 	boolean sendMessage(User friend, String message);
 	
+	/*
+	 * Return true, if send file successfully
+	 * Return false, otherwise
+	 */
 	boolean sendFile(User friend, String file);
 	
 	/*
@@ -58,11 +77,12 @@ public interface ProxyServer {
 	void logOut() throws SQLException;
 	
 	/*
-	 * Call this when app ends.
+	 * Call this when app ends
 	 */
 	void quit();
 	
+	/*
+	 * Call this when switching views
+	 */
 	void changeView(View view);
-	
-	User getUser();
 }

@@ -1,4 +1,3 @@
-import java.awt.EventQueue;
 import java.sql.SQLException;
 
 public class ChatApp {

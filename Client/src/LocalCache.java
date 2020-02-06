@@ -20,7 +20,7 @@ public class LocalCache implements ProxyServer
 	private static final String userTable = "User";
 	private static final String friendTable = "Friend";
 	private static final String messageTable = "Message";
-	private static final String userFields = "(UserName TEXT PRIMARY KEY, Password TEXT)";
+	private static final String userFields = "(UserName TEXT PRIMARY KEY, Password TEXT, KeepLogIn INT DEFAULT 0)";
 	private static final String friendFields = "(FriendID INTEGER PRIMARY KEY, FriendName TEXT)";
 	private static final String messageFields = "(MessageID INTEGER PRIMARY KEY, SenderID INTEGER, ReceiverID INTEGER, Timestamp DATETIME, Content TEXT)";
 	private Connection conn;
@@ -52,8 +52,22 @@ public class LocalCache implements ProxyServer
 		try {
 			conn = DriverManager.getConnection(protocol + filepath + database);
 			stmt = conn.createStatement();
+			createTableIfNotExists(userTable, userFields);
+			createTableIfNotExists(friendTable, friendFields);
+			createTableIfNotExists(messageTable, messageFields);
 		} catch (SQLException e) {
 			System.err.println("Fail to connect cache database: " + e.getMessage());
+			System.exit(0);
+		}
+	}
+	
+	private void createTableIfNotExists(String tableName, String fields) {
+		try {
+			if (conn.getMetaData().getTables(null, null, tableName, null).next() == false) {
+				stmt.execute("CREATE TABLE " + tableName + fields);
+			}
+		} catch (SQLException e) {
+			System.err.println("Fail to fetch " + tableName + " Information: " + e.getMessage());
 			System.exit(0);
 		}
 	}
@@ -87,17 +101,13 @@ public class LocalCache implements ProxyServer
 	}
 	
 	public boolean autoLogIn() throws SQLException {
-		if (checkConnectionState() == false) {
-			return false;
-		}
-		
-		if (conn.getMetaData().getTables(null, null, userTable, null).next() == false) {
-			return false;
-		}
-		
 		resultSet = stmt.executeQuery("SELECT * FROM " + userTable);
 		
 		if (resultSet.next() == false) {
+			return false;
+		} else if (resultSet.getInt("KeepLogin") == 0) {
+			return false;
+		} else if (checkConnectionState() == false) {
 			return false;
 		} else {
 			Message message = new Message();
@@ -135,20 +145,13 @@ public class LocalCache implements ProxyServer
 		userID = recv_packet.message.senderID;
 		this.userName = userName;
 		
-		closeDatabase();
-		connectDatabase();
-		stmt.execute("DROP TABLE IF EXISTS " + userTable);
-		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
-		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
+		stmt.execute("DELETE FROM " + userTable);
+		stmt.execute("DELETE FROM " + friendTable);
+		stmt.execute("DELETE FROM " + messageTable);
 		
-		if (KeepLogIn) {
-			stmt.execute("CREATE TABLE " + userTable + userFields);
-			stmt.execute(
-				"INSERT INTO " + userTable + " " +
-				"VALUES ('" + userName +  "', '" + password + "')");
-		}
-		stmt.execute("CREATE TABLE " + friendTable + friendFields);
-		stmt.execute("CREATE TABLE " + messageTable + messageFields);
+		stmt.execute(
+			"INSERT INTO " + userTable + " " +
+			"VALUES ('" + userName +  "', '" + password + "', " + (KeepLogIn ? 1 : 0) + ")");
 		
 		this.update();
 		
@@ -169,15 +172,28 @@ public class LocalCache implements ProxyServer
 		return isSuccessful(recvQueue.pop());
 	}
 
-	public List<Pair<User, Message>> getFriendList() throws SQLException {
-		List<Pair<User, Message>> friendList = new ArrayList<>();
-		
-		resultSet = stmt.executeQuery("SELECT * FROM " + friendTable);
+	public List<User> getFriendList() throws SQLException {
+		List<User> friendList = new ArrayList<>();
+		resultSet = conn.createStatement().executeQuery("SELECT * FROM " + friendTable);
 		
 		while (resultSet.next()) {
-			int friendID = resultSet.getInt("FriendID");
-			User friend = new User(friendID, resultSet.getString("FriendName"));
-			friendList.add(new Pair<>(friend, getNewestMessage(friendID)));
+			friendList.add(new User(resultSet.getInt("FriendID"), resultSet.getString("FriendName")));
+		}	
+		
+		return friendList;
+	}
+	
+	public List<Pair<User, Message>> getFriendListWithNewestMessage() throws SQLException {
+		List<Pair<User, Message>> friendList = new ArrayList<>();
+		ResultSet resultSet2 = conn.createStatement().executeQuery("SELECT * FROM " + friendTable);
+		
+		while (resultSet2.next()) {
+			int friendID = resultSet2.getInt("FriendID");
+			User friend = new User(friendID, resultSet2.getString("FriendName"));
+			Message newestMessage = getNewestMessage(friendID);
+			if (newestMessage != null) {
+				friendList.add(new Pair<>(friend, newestMessage));
+			}
 		}	
 		
 		return friendList;
@@ -227,14 +243,14 @@ public class LocalCache implements ProxyServer
 		sendQueue.push(new Packet(Packet.Type.ADD_FRIEND, message));
 		Packet recv_packet = recvQueue.pop();
 		
-		this.update();
-		
 		if (isSuccessful(recv_packet) == false) {
+			this.update();
 			return false;
+		} else {
+			newFriend(recv_packet.message);
+			this.update();
+			return true;
 		}
-		newFriend(recv_packet.message);
-		
-		return true;
 	}
 	
 	public List<Message> getMsgHistory(User friend, int smallestMessageID) throws SQLException {
@@ -309,9 +325,27 @@ public class LocalCache implements ProxyServer
 	
 	public boolean reconnect() throws SQLException {
 		clientSocket.connect();
+		
+		if (socketIsAlive == false) {
+			view.setErrorMessage("Fail to connect server");
+			return false;
+		}
+		
+		resultSet = stmt.executeQuery("SELECT * FROM " + userTable);
+		resultSet.next();
+		
+		Message message = new Message();
+		message.content = userName + resultSet.getString("Password");
+		sendQueue.push(new Packet(Packet.Type.LOG_IN, message));
+		
+		Packet recv_packet = recvQueue.pop();
+		if (isSuccessful(recv_packet) == false) {
+			return false;
+		}
+		
 		this.update();
 		
-		return socketIsAlive;
+		return true;
 	}
 	
 	public void logOut() throws SQLException {
@@ -322,24 +356,24 @@ public class LocalCache implements ProxyServer
 			System.err.println("Unexpected Error: " + e.getMessage());
 		};
 		
-		closeDatabase();
-		connectDatabase();
-		stmt.execute("DROP TABLE IF EXISTS " + userTable);
-		stmt.execute("DROP TABLE IF EXISTS " + friendTable);
-		stmt.execute("DROP TABLE IF EXISTS " + messageTable);
+		stmt.execute("DELETE FROM " + userTable);
+		stmt.execute("DELETE FROM " + friendTable);
+		stmt.execute("DELETE FROM " + messageTable);
 		
 		userID = -1;
 		userName = null;
 		sendQueue.push(new Packet(Packet.Type.LOG_OUT, null));
 		
-		ViewFactory.singletonViewMap.clear();
+		ViewFactory.clear();
 	}
 	
 	public void quit() {
-		clientSocket.close();
-		this.closeDatabase();
-		recvQueue.push(new Packet(Packet.Type.QUIT, null));
 		sendQueue.push(new Packet(Packet.Type.QUIT, null));
+		recvQueue.push(new Packet(Packet.Type.QUIT, null));
+		this.closeDatabase();
+		ViewFactory.clear();
+		clientSocket.close();
+		System.exit(0);		
 	}
 	
 	public void changeView(View view) { 
@@ -352,6 +386,19 @@ public class LocalCache implements ProxyServer
 		}
 		
 		return new User(userID, userName);
+	}
+	
+	public User getUser(int userID) throws SQLException {
+		resultSet = stmt.executeQuery(
+			"SELECT FriendName " +
+			"FROM " + friendTable + " " +
+			"WHERE FriendID = " + userID);
+		
+		if (resultSet.next() == false) {
+			view.setErrorMessage("No such user");
+		}
+		
+		return new User(userID, resultSet.getString("FriendName"));
 	}
 	
 	private void update() throws SQLException {
@@ -423,8 +470,6 @@ public class LocalCache implements ProxyServer
 	}
 	
 	private void recvMessage(Message message) throws SQLException {
-		view.newMessage(message);
-
 		stmt.execute(
 			"INSERT INTO " + messageTable + " " +
 			"VALUES (" + message.msgID +  ", " +
@@ -432,6 +477,8 @@ public class LocalCache implements ProxyServer
 				message.receiverID +  ", '" +
 				message.timestamp + "', '" +
 				message.content + "')");
+		
+		view.newMessage(message);
 	}
 	
 	private void newFriend(Message message) throws SQLException {
@@ -444,25 +491,25 @@ public class LocalCache implements ProxyServer
 			friendName = tokens.nextToken();
 		}
 		
-		view.newFriend(new User(friendID, friendName));
-		
 		stmt.execute(
 			"INSERT INTO " + friendTable + " " +
 			"VALUES (" + friendID +  ", '" + friendName + "')");
+		
+		view.newFriend(new User(friendID, friendName));
 	}
 	
 	private void recvFile(Message message) throws SQLException {
    		LocalDateTime now = LocalDateTime.now(); 
 		message.timestamp = now.toString();
 
-		view.newMessage(message);
-		
 		try {
 			Runtime rt = Runtime.getRuntime();
 			Process pr = rt.exec("java FileReceiver " + message.content);
 		} catch (IOException e) {
 			view.setErrorMessage("Unable to receive file: " + e.getMessage());
 		}
+		
+		view.newMessage(message);
 	}
 	
 	private String encrypt(String strToEncrypt) {
@@ -495,8 +542,14 @@ public class LocalCache implements ProxyServer
 	private boolean checkConnectionState() {
 		if (socketIsAlive) {
 			return true;
+		} else {
+			clientSocket.connect();
+			if (socketIsAlive) {
+				return true;
+			} else {
+				view.setErrorMessage("Not connect to Internet");
+				return false;
+			}
 		}
-		view.setErrorMessage("Not connect to Internet");
-		return false;
 	}
 }

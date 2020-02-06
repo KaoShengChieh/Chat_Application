@@ -1,15 +1,28 @@
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * This static class implements Singleton and Factory
+ * design pattern to manage calling flow among views.
+ * The content is simple but quite significant.
+ */
+
 public class ViewFactory {
-	static Map<ViewType, View> singletonViewMap = new EnumMap<>(ViewType.class);
+	private static Map<ViewType, View> viewMap = new EnumMap<>(ViewType.class);
+	private static Map<Integer, ChatBox> chatBoxMap = new HashMap<>();
 	
 	public static void setProxyServer(ProxyServer proxyServer) {
 		View.proxyServer = proxyServer;
 	}
+	
+	public static void clear() {
+		chatBoxMap.clear();
+		viewMap.clear();
+	}
 
 	public static View getView(ViewType type) {
-		if (singletonViewMap.containsKey(type) == false) {
+		if (viewMap.containsKey(type) == false) {
 			View view = null;
 			switch (type) {
 				case LOGIN:
@@ -29,9 +42,9 @@ public class ViewFactory {
 					break;
 			}
 			view.type = type;
-			singletonViewMap.put(type, view);
+			viewMap.put(type, view);
 		}
-		return singletonViewMap.get(type);
+		return viewMap.get(type);
 	}
 	
 	public static void changeView(View oldView, ViewType type) {
@@ -60,5 +73,12 @@ public class ViewFactory {
 		View.proxyServer.changeView(newView);
 		newView.setVisible(true);
 		oldView.setVisible(false);
+	}
+	
+	public static ChatBox getChatBox(User friend) {
+		if (chatBoxMap.containsKey(friend.ID) == false) {
+			chatBoxMap.put(friend.ID, new ChatBox(friend));
+		}
+		return chatBoxMap.get(friend.ID);
 	}
 }

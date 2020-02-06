@@ -100,7 +100,12 @@ public class AddFriend extends View {
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				System.exit(0);
+				if (JOptionPane.showConfirmDialog(AddFriend.this, 
+					"Are you sure you want to exit?", "Exit Application", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+					proxyServer.quit();
+				}
 			}
 		});
 		lblClose.setHorizontalAlignment(SwingConstants.CENTER);
@@ -161,23 +166,15 @@ public class AddFriend extends View {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String friendName = SearchFriend.getText().toString();
-				//check if username exist
-				boolean exist  = false;
 				
 				try {
-					exist = proxyServer.addFriend(friendName);
-				} catch (SQLException ee) {
-					setErrorMessage(ee.getMessage());
-				}
-				if (exist) {
-					int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
-					if (action == 0) {
+					boolean successful = proxyServer.addFriend(friendName);
+					if (successful) {
 						JOptionPane.showMessageDialog(null, "Say Hi to your new friend!");
 					}
-					SearchFriend.setText("");
-				}
-				else {
-					//JOptionPane.showMessageDialog(null, "No such user!");
+				} catch (SQLException ee) {
+					setErrorMessage(ee.getMessage());
+				} finally {
 					SearchFriend.setText("");
 				}
 			}
@@ -186,26 +183,6 @@ public class AddFriend extends View {
 		button.setBackground(Color.YELLOW);
 		button.setBounds(164, 229, 131, 36);
 		contentPane.add(button);
-		
-//		JButton btnSearch = new JButton("Search and Add");
-//		btnSearch.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				
-//				//if exist
-//				int action = JOptionPane.showConfirmDialog(null, "Add to friend list?", "Add", JOptionPane.YES_NO_OPTION);
-//				if (action == 0) {
-//					JOptionPane.showMessageDialog(null, "Say Hi to your new friend!");
-//				}
-//				//doesn't exist
-//			}
-//		});
-//		Image search = new ImageIcon(this.getClass().getResource("/search.png")).getImage();
-//		btnSearch.setIcon(new ImageIcon(search));
-//		
-//		btnSearch.setForeground(Color.ORANGE);
-//		btnSearch.setBackground(Color.YELLOW);
-//		btnSearch.setBounds(164, 271, 131, 36);
-//		contentPane.add(btnSearch);
 	}
 	
 	public void getOffline(){}

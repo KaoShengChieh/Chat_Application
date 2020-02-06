@@ -43,7 +43,7 @@ public class Home extends View {
 	public Home() {
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 406, 476);
+		setBounds(100, 100, 406, 490);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -134,8 +134,12 @@ public class Home extends View {
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				
-				System.exit(0);
+				if (JOptionPane.showConfirmDialog(Home.this, 
+					"Are you sure you want to exit?", "Exit Application", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+					proxyServer.quit();
+				}
 			}
 		});
 		lblClose.setHorizontalAlignment(SwingConstants.CENTER);
@@ -240,7 +244,7 @@ public class Home extends View {
 			myFriends = proxyServer.getFriendList();
 			itr = myFriends.listIterator();
 			while (itr.hasNext()) {
-				friendButton = getFriendButton(itr.next());
+				friendButton = getFriendButton(itr.next().first);
 				friendsJPanel.add(friendButton);
 			}
 		} catch (SQLException exception) {
@@ -261,16 +265,9 @@ public class Home extends View {
 		FriendsListJPanel.setLayout(gl_FriendsJPanel);
 	}
 	
-	private JButton getFriendButton(Pair<User, Message> friend) {
-		int friendID = friend.first.ID;
-		String friendName = friend.first.name;
-		String timestamp = "";
-		String latestMsg = "";
-		
-		if (friend.second != null) {
-			latestMsg = friend.second.content;
-			timestamp = friend.second.timestamp;
-		}
+	private JButton getFriendButton(User friend) {
+		int friendID = friend.ID;
+		String friendName = friend.name;
 		
 		JButton friendButton = new JButton(friendName);
 		friendButton.setPreferredSize(new Dimension(290, 100));
@@ -278,7 +275,7 @@ public class Home extends View {
 		friendButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ChatBox chatbox = new ChatBox(friend.first);
+				ChatBox chatbox = ViewFactory.getChatBox(friend);
 				chatbox.setVisible(true);
 			}
 		});
@@ -289,9 +286,18 @@ public class Home extends View {
 		return friendButton;
 	}
 	
+	public void newFriend(User friend) {
+		if (tabbedPane == null || tabbedPane.getSelectedIndex() == 0) {
+			return;
+		} else if (tabbedPane.getSelectedIndex() == 1) {
+			tabbedPane.remove(1);
+			tabbedPane.addTab("Friends", null, FriendsListJPanel, null);
+			setFriendListPanel();
+		}
+	}
+	
 	public void getOffline() {
 		connected = false;
 		lblReconnect.setVisible(true);
 	}
 }
-

@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import javax.swing.border.EmptyBorder;
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
@@ -19,11 +20,16 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
-public class FriendList extends View{
+public class FriendList extends View {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
@@ -72,7 +78,12 @@ public class FriendList extends View{
 			public void mouseClicked(MouseEvent arg0) {
 				int action = JOptionPane.showConfirmDialog(null, "Do you really want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
 				if (action == 0) {
-					ViewFactory.changeView(FriendList.this, ViewType.LOGIN);
+					try {
+						proxyServer.logOut();
+						ViewFactory.changeView(FriendList.this, ViewType.LOGIN);
+					} catch (SQLException e) {
+						setErrorMessage(e.getMessage());
+					}
 				}
 			}
 		});
@@ -103,8 +114,12 @@ public class FriendList extends View{
 		lblClose.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				
-				System.exit(0);
+				if (JOptionPane.showConfirmDialog(FriendList.this, 
+					"Are you sure you want to exit?", "Exit Application", 
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+					proxyServer.quit();
+				}
 			}
 		});
 		lblClose.setHorizontalAlignment(SwingConstants.CENTER);
@@ -161,16 +176,33 @@ public class FriendList extends View{
 		
 		JScrollPane FriendScrollPane = new JScrollPane();
 		JPanel friendsJPanel = new JPanel();
+		friendsJPanel.setLayout(new BoxLayout(friendsJPanel, BoxLayout.Y_AXIS));
 		
 		List<Pair<User, Message>> myFriends = null;
 		ListIterator<Pair<User, Message>> itr = null;
 		JButton friendButton = null;
+		Pair<User, Message> friendInfo = null;
 		
 		try {
-			myFriends = proxyServer.getFriendList();
+			myFriends = proxyServer.getFriendListWithNewestMessage();
+			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+			Collections.sort(myFriends, new Comparator<Pair<User, Message>>() {
+				public int compare(Pair<User, Message> friend1, Pair<User, Message> friend2) {
+					 return (int)ChronoUnit.SECONDS.between(
+							 LocalDateTime.parse(friend1.second.timestamp,formatter),
+							 LocalDateTime.parse(friend2.second.timestamp,formatter));
+				}
+			});
 			itr = myFriends.listIterator();
 			while (itr.hasNext()) {
-				friendButton = getFriendButton(itr.next());
+				friendInfo = itr.next();
+				if (friendInfo.second == null) {
+					System.err.println(friendInfo.first.name + "did not send message");
+					continue;
+				}
+				friendButton = getFriendButton(friendInfo);
 				friendsJPanel.add(friendButton);
 			}
 		} catch (SQLException exception) {
@@ -194,13 +226,8 @@ public class FriendList extends View{
 	private JButton getFriendButton(Pair<User, Message> friend) {
 		int friendID = friend.first.ID;
 		String friendName = friend.first.name;
-		String timestamp = "";
-		String latestMsg = "";
-		
-		if (friend.second != null) {
-			latestMsg = friend.second.content;
-			timestamp = friend.second.timestamp;
-		}
+		String timestamp = friend.second.timestamp;
+		String latestMsg = friend.second.content;
 		
 		JButton friendButton = new JButton(getButtonText(friendName, timestamp, latestMsg));
 		friendButton.setPreferredSize(new Dimension(290, 100));
@@ -208,7 +235,7 @@ public class FriendList extends View{
 		friendButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ChatBox chatbox = new ChatBox(friend.first);
+				ChatBox chatbox = ViewFactory.getChatBox(friend.first);
 				chatbox.setVisible(true);
 			}
 		});
@@ -220,8 +247,12 @@ public class FriendList extends View{
 	}
 	
 	private String getButtonText(String name, String timestamp, String content) {
-		String text = name + "\n" + timestamp + "\n" + content;
-		
+		String text = "\n" +
+			name + " ".repeat(20-name.length()) + timestamp + "\n" +
+			" ".repeat(40) + "\n" +
+			(content.length() < 30 ? content : content.substring(0, 30) + "...") +
+			"\n\n";
+	
 		text = "<html>" + text + "</html>";
 	 	text = text.replace("\n", "<br/>").replace(" ", "&nbsp;");
 	 	
@@ -230,15 +261,11 @@ public class FriendList extends View{
 	
 	public void getOffline() {}
 	public void newMessage(Message message) {
-		User myself = proxyServer.getUser();
-		int friendID = message.senderID != myself.ID ? message.senderID : message.receiverID;
-		JButton friendButton = buttonsMap.get(friendID);
-		String friendName = friendMap.get(friendID);
-		
-		friendButton.setText(getButtonText(friendName, message.timestamp, message.content));
+		super.newMessage(message);
+		setFriendListPanel();
 	}
 	
 	public void newFriend(User friend) {
-		//TODO
+		setFriendListPanel();
 	}
 }

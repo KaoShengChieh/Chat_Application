@@ -6,7 +6,11 @@ import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
@@ -22,6 +26,8 @@ public class ChatBox extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
+	private JPanel panelFriendInfo;
+	private JTextPane txtpnOffline;
 	private JTextField textFieldSend;
 	private JTextArea textAreaChat;
 	private User friend;
@@ -42,21 +48,33 @@ public class ChatBox extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JPanel panelFriendInfo = new JPanel();
+		panelFriendInfo = new JPanel();
 		panelFriendInfo.setBackground(SystemColor.windowBorder);
-		panelFriendInfo.setBounds(0, 0, 773, 71);
+		panelFriendInfo.setBounds(0, 0, 729, 71);
 		contentPane.add(panelFriendInfo);
 		panelFriendInfo.setLayout(null);
 		
-		String friendName = friend.name;
-		
-		JLabel lblTitle = new JLabel(friendName);
+		JLabel lblTitle = new JLabel(friend.name);
 		lblTitle.setBackground(UIManager.getColor("Button.darkShadow"));
 		lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblTitle.setFont(new Font("Toppan Bunkyu Gothic", Font.PLAIN, 24));
 		lblTitle.setForeground(Color.DARK_GRAY);
-		lblTitle.setBounds(10, 16, 243, 49);
+		lblTitle.setBounds(10, 4, 243, 49);
 		panelFriendInfo.add(lblTitle);
+		
+		txtpnOffline = new JTextPane();
+		txtpnOffline.setForeground(Color.WHITE);
+		txtpnOffline.setFont(new Font("Dialog", Font.BOLD, 12));
+		txtpnOffline.setEditable(false);
+		txtpnOffline.setText("You are offline right now");
+		txtpnOffline.setBackground(Color.LIGHT_GRAY);
+		txtpnOffline.setBounds(0, 49, 729, 22);
+		txtpnOffline.setVisible(false);
+		StyledDocument doc = txtpnOffline.getStyledDocument();
+		SimpleAttributeSet center = new SimpleAttributeSet();
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		contentPane.add(txtpnOffline);
 		
 		JPanel panelSend = new JPanel();
 		panelSend.setLayout(null);
@@ -108,6 +126,7 @@ public class ChatBox extends JFrame {
 		contentPane.add(scrollPaneChat);
 		
 		textAreaChat = new JTextArea();
+		textAreaChat.setEditable(false);
 		textAreaChat.setBackground(SystemColor.window);
 		textAreaChat.setLineWrap(true);
 		textAreaChat.setFont(new Font("Toppan Bunkyu Gothic", Font.BOLD, 16));
@@ -151,8 +170,6 @@ public class ChatBox extends JFrame {
 		}
 	}
 	
-	public void getOffline() {}
-	
 	public void newMessage(Message message) {
 		String recvMsg = message.content;
 		//Add the message to the chat box.
@@ -167,5 +184,15 @@ public class ChatBox extends JFrame {
 	
 	public void setErrorMessage(String message) {
 		JOptionPane.showMessageDialog(null, "Error: " + message);
+	}
+	
+	public void setOnline(boolean isOnline) {
+		if (isOnline) {
+			panelFriendInfo.setBounds(0, 0, 729, 71);
+			txtpnOffline.setVisible(false);
+		} else {
+			panelFriendInfo.setBounds(0, 0, 729, 49);
+			txtpnOffline.setVisible(true);
+		}
 	}
 }

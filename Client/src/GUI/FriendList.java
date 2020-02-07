@@ -5,6 +5,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -17,13 +20,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,9 +35,8 @@ public class FriendList extends View {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
+	private JTextPane txtpnOffline;
 	private JTabbedPane tabbedPane;
-	private Map<Integer, JButton> buttonsMap = new HashMap<>();
-	private Map<Integer, String> friendMap = new HashMap<>();
 	private int xx,xy;
 
 	/**
@@ -61,7 +62,7 @@ public class FriendList extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(FriendList.this, ViewType.ADD_FRIEND);
+				View.change(FriendList.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(FriendList.class.getResource("image/userAdd.png")));
@@ -80,7 +81,7 @@ public class FriendList extends View {
 				if (action == 0) {
 					try {
 						proxyServer.logOut();
-						ViewFactory.changeView(FriendList.this, ViewType.LOGIN);
+						View.change(FriendList.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -98,7 +99,7 @@ public class FriendList extends View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(FriendList.this, ViewType.PROFILE);
+				View.change(FriendList.this, ViewType.PROFILE);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -147,6 +148,20 @@ public class FriendList extends View {
 		});
 		lblImg.setBounds(-97, -2, 552, 281);
 		lblImg.setVerticalAlignment(SwingConstants.TOP);
+		
+		txtpnOffline = new JTextPane();
+		txtpnOffline.setForeground(Color.WHITE);
+		txtpnOffline.setFont(new Font("Dialog", Font.BOLD, 12));
+		txtpnOffline.setEditable(false);
+		txtpnOffline.setText("You are offline right now");
+		txtpnOffline.setBackground(Color.LIGHT_GRAY);
+		txtpnOffline.setBounds(45, 0, 362, 22);
+		txtpnOffline.setVisible(false);
+		StyledDocument doc = txtpnOffline.getStyledDocument();
+		SimpleAttributeSet center = new SimpleAttributeSet();
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		contentPane.add(txtpnOffline);
 		
 		JLabel lblChats = new JLabel("Chats");
 		lblChats.setBackground(new Color(0, 102, 204));
@@ -224,7 +239,6 @@ public class FriendList extends View {
 	}
 	
 	private JButton getFriendButton(Pair<User, Message> friend) {
-		int friendID = friend.first.ID;
 		String friendName = friend.first.name;
 		String timestamp = friend.second.timestamp;
 		String latestMsg = friend.second.content;
@@ -235,13 +249,10 @@ public class FriendList extends View {
 		friendButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ChatBox chatbox = ViewFactory.getChatBox(friend.first);
+				ChatBox chatbox = View.getChatBox(friend.first);
 				chatbox.setVisible(true);
 			}
 		});
-		
-		buttonsMap.put(friendID, friendButton);
-		friendMap.put(friendID, friendName);
 		
 		return friendButton;
 	}
@@ -259,7 +270,6 @@ public class FriendList extends View {
 	 	return text;
 	}
 	
-	public void getOffline() {}
 	public void newMessage(Message message) {
 		super.newMessage(message);
 		setFriendListPanel();
@@ -267,5 +277,10 @@ public class FriendList extends View {
 	
 	public void newFriend(User friend) {
 		setFriendListPanel();
+	}
+	
+	public void setOnline(boolean isOnline) {
+		super.setOnline(isOnline);
+		txtpnOffline.setVisible(isOnline == false);
 	}
 }

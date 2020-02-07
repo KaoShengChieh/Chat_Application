@@ -7,6 +7,7 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.BoxLayout;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
@@ -18,23 +19,22 @@ import javax.swing.SwingConstants;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JScrollPane;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.event.ChangeEvent;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
+import javax.swing.JTextPane;
 
 public class Home extends View {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
-	private boolean connected;
-	private JLabel lblReconnect;
+	private JTextPane txtpnOffline;
 	private JTabbedPane tabbedPane;
 	private JPanel FriendsListJPanel;
-	private Map<Integer, JButton> buttonsMap = new HashMap<>();
-	private Map<Integer, String> friendMap = new HashMap<>();
 	private int xx,xy;
 
 	/**
@@ -60,7 +60,7 @@ public class Home extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(Home.this, ViewType.ADD_FRIEND);
+				View.change(Home.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(Home.class.getResource("image/userAdd.png")));
@@ -69,27 +69,6 @@ public class Home extends View {
 		lblAddfriend.setHorizontalAlignment(SwingConstants.CENTER);
 		lblAddfriend.setForeground(new Color(241, 57, 83));
 		lblAddfriend.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		
-		lblReconnect = new JLabel("");
-		lblReconnect.setIcon(new ImageIcon(Home.class.getResource("image/web-icon.png")));
-		lblReconnect.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				try {
-					connected = proxyServer.reconnect();
-					if (connected)
-						lblReconnect.setVisible(false);
-				} catch (SQLException e) {
-					setErrorMessage(e.getMessage());
-				}
-			}
-		});
-		lblReconnect.setHorizontalAlignment(SwingConstants.CENTER);
-		lblReconnect.setForeground(new Color(241, 57, 83));
-		lblReconnect.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		lblReconnect.setBounds(0, 358, 48, 71);
-		lblReconnect.setVisible(false);
-		panel.add(lblReconnect);
 		
 		JLabel lblLogout = new JLabel("");
 		lblLogout.setIcon(new ImageIcon(Home.class.getResource("image/logout.png")));
@@ -100,7 +79,7 @@ public class Home extends View {
 				if (action == 0) {
 					try {
 						proxyServer.logOut();
-						ViewFactory.changeView(Home.this, ViewType.LOGIN);
+						View.change(Home.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -118,7 +97,7 @@ public class Home extends View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(Home.this, ViewType.FRIEND_LIST);
+				View.change(Home.this, ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -218,6 +197,20 @@ public class Home extends View {
 		FriendsListJPanel.setBackground(Color.WHITE);
 		tabbedPane.addTab("Friends", null, FriendsListJPanel, null);
 		
+		txtpnOffline = new JTextPane();
+		txtpnOffline.setForeground(Color.WHITE);
+		txtpnOffline.setFont(new Font("Dialog", Font.BOLD, 12));
+		txtpnOffline.setEditable(false);
+		txtpnOffline.setText("You are offline right now");
+		txtpnOffline.setBackground(Color.LIGHT_GRAY);
+		txtpnOffline.setBounds(45, 0, 362, 22);
+		txtpnOffline.setVisible(false);
+		StyledDocument doc = txtpnOffline.getStyledDocument();
+		SimpleAttributeSet center = new SimpleAttributeSet();
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		contentPane.add(txtpnOffline);
+		
 		tabbedPane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (tabbedPane.getSelectedIndex() == 0) {
@@ -235,16 +228,17 @@ public class Home extends View {
 		FriendsListJPanel.add(FriendScrollPane);
 		
 		JPanel friendsJPanel = new JPanel();
+		friendsJPanel.setLayout(new BoxLayout(friendsJPanel, BoxLayout.Y_AXIS));
 		
-		List<Pair<User, Message>> myFriends = null;
-		ListIterator<Pair<User, Message>> itr = null;
+		List<User> myFriends = null;
+		ListIterator<User> itr = null;
 		JButton friendButton = null;
 		
 		try {
 			myFriends = proxyServer.getFriendList();
 			itr = myFriends.listIterator();
 			while (itr.hasNext()) {
-				friendButton = getFriendButton(itr.next().first);
+				friendButton = getFriendButton(itr.next());
 				friendsJPanel.add(friendButton);
 			}
 		} catch (SQLException exception) {
@@ -266,24 +260,27 @@ public class Home extends View {
 	}
 	
 	private JButton getFriendButton(User friend) {
-		int friendID = friend.ID;
-		String friendName = friend.name;
-		
-		JButton friendButton = new JButton(friendName);
+		JButton friendButton = new JButton(getButtonText(friend.name));
 		friendButton.setPreferredSize(new Dimension(290, 100));
 		
 		friendButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				ChatBox chatbox = ViewFactory.getChatBox(friend);
+				ChatBox chatbox = View.getChatBox(friend);
 				chatbox.setVisible(true);
 			}
 		});
 		
-		buttonsMap.put(friendID, friendButton);
-		friendMap.put(friendID, friendName);
-		
 		return friendButton;
+	}
+	
+	private String getButtonText(String name) {
+		String text = "\n" + name + "\n\n";
+	
+		text = "<html>" + text + "</html>";
+	 	text = text.replace("\n", "<br/>").replace(" ", "&nbsp;");
+	 	
+	 	return text;
 	}
 	
 	public void newFriend(User friend) {
@@ -296,8 +293,8 @@ public class Home extends View {
 		}
 	}
 	
-	public void getOffline() {
-		connected = false;
-		lblReconnect.setVisible(true);
+	public void setOnline(boolean isOnline) {
+		super.setOnline(isOnline);
+		txtpnOffline.setVisible(isOnline == false);
 	}
 }

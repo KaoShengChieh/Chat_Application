@@ -7,15 +7,15 @@ public class ChatApp {
 	public static void main(String[] args) {
 		try {
 			ProxyServer localCache = new LocalCache();
-			ViewFactory.setProxyServer(localCache);
+			View.setProxyServer(localCache);
 			
-			View frame = ViewFactory.getView(ViewType.LOGIN);
+			View frame = View.get(ViewType.LOGIN);
 			frame.setUndecorated(true);
 			frame.setVisible(true);
 			
 			try {
 				if (localCache.autoLogIn()) {
-					ViewFactory.changeView(frame, ViewType.PROFILE);
+					View.change(frame, ViewType.PROFILE);
 					return;
 				}
 			} catch (SQLException e) {

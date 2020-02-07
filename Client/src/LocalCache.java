@@ -92,12 +92,47 @@ public class LocalCache implements ProxyServer
 	public void setOnlineBySocket(String serverAddress) {
 		socketIsAlive = true;
 		this.serverAddress = serverAddress;
+		
+		if (view != null)
+			view.setOnline(true);
 	}
 	
 	public void setOfflineBySocket() {
-		socketIsAlive = false;
-		if (view != null)
-			view.getOffline();
+		if (socketIsAlive == false) {
+			return;
+		}
+		
+		socketIsAlive = false;		
+		
+		if (userID != -1) {
+			try {
+				recvQueue.push(new Packet(Packet.Type.QUIT, null));
+				MVCthread.join();
+			} catch (InterruptedException e) {
+				System.err.println("Unexpected Error: " + e.getMessage());
+			};
+		}
+			
+		while (socketIsAlive == false) {
+			if (view != null)
+				view.setOnline(false);
+
+			try { // reconnect per 3 sec 
+				Thread.sleep(3000); 
+			} catch (InterruptedException e) {
+				// do nothing
+			} finally {
+				if (userID == -1) {
+					clientSocket.connect();
+				} else {
+					try {
+						reconnect();
+					} catch (SQLException e) {
+						view.setErrorMessage("Unable to reconnect");
+					}
+				}
+			}
+		}
 	}
 	
 	public boolean autoLogIn() throws SQLException {
@@ -327,7 +362,6 @@ public class LocalCache implements ProxyServer
 		clientSocket.connect();
 		
 		if (socketIsAlive == false) {
-			view.setErrorMessage("Fail to connect server");
 			return false;
 		}
 		
@@ -364,14 +398,14 @@ public class LocalCache implements ProxyServer
 		userName = null;
 		sendQueue.push(new Packet(Packet.Type.LOG_OUT, null));
 		
-		ViewFactory.clear();
+		View.clear();
 	}
 	
 	public void quit() {
 		sendQueue.push(new Packet(Packet.Type.QUIT, null));
 		recvQueue.push(new Packet(Packet.Type.QUIT, null));
 		this.closeDatabase();
-		ViewFactory.clear();
+		View.clear();
 		clientSocket.close();
 		System.exit(0);		
 	}
@@ -461,7 +495,6 @@ public class LocalCache implements ProxyServer
 					}
 				} catch (SQLException e) {
 					view.setErrorMessage(e.getMessage());
-					view.getOffline();
 				}
 			}
 		});
@@ -543,7 +576,16 @@ public class LocalCache implements ProxyServer
 		if (socketIsAlive) {
 			return true;
 		} else {
-			clientSocket.connect();
+			if (userID == -1) {
+				clientSocket.connect();
+			} else {
+				try {
+					reconnect();
+				} catch (SQLException e) {
+					view.setErrorMessage("Unable to reconnect");
+				}
+			}
+			
 			if (socketIsAlive) {
 				return true;
 			} else {

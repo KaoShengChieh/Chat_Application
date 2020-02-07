@@ -101,7 +101,7 @@ public class Register extends View {
 					
 					if (signUpSuccessful) {
 						JOptionPane.showMessageDialog(null, "Successfully Registered!");
-						ViewFactory.changeView(Register.this, ViewType.LOGIN);
+						View.change(Register.this, ViewType.LOGIN);
 					}
 				}
 			}
@@ -141,7 +141,7 @@ public class Register extends View {
 		lbl_close.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(Register.this, ViewType.LOGIN);
+				View.change(Register.this, ViewType.LOGIN);
 			}
 		});
 		lbl_close.setHorizontalAlignment(SwingConstants.CENTER);

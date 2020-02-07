@@ -19,7 +19,6 @@ public class ClientSocket
 	private BlockingQueue<Packet> recvQueue;
 	private LocalCache localCache;
 	private boolean inputIsClosed;
-	private boolean outputIsClosed;
 
 	public ClientSocket(BlockingQueue<Packet> sendQueue, BlockingQueue<Packet> recvQueue, LocalCache localCache) {
 		this(CONFIG);
@@ -65,29 +64,33 @@ public class ClientSocket
 			outputObject = new ObjectOutputStream(socket.getOutputStream());
 			inputObject = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			this.close("Fail to connect server");
+			this.close("Fail to connect server: " + e.getMessage());
 			return;
 		}
 		
 		localCache.setOnlineBySocket(serverAddress);
+		inputIsClosed = false;
 		
 		try {
 			new Thread(new Runnable() {
 				public void run() { 
 					Packet send_packet = null;
 					try {
-						do {
+						while (true) {
 							send_packet = getPacket();
+							if (inputIsClosed) {
+								break;
+							}
 							writeSocket(send_packet);
-						} while (send_packet.type != Packet.Type.QUIT);
-					} catch (IOException e) {
-						close("Disconnected with server: " + e.getMessage());
-                    } finally {
-						outputIsClosed = true;
-						if (inputIsClosed == false) {
-							recvQueue.push(new Packet(Packet.Type.QUIT, null));
-							localCache.setOfflineBySocket();
 						}
+					} catch (IOException e) {
+						if (e.getMessage() == null) {
+							close("Disconnected with server");
+						} else {
+							close("Upload error: " + e.getMessage());
+						}
+                    } finally {
+						System.err.println("Upload closed");
                     }
 				}
 			}).start(); 
@@ -101,16 +104,19 @@ public class ClientSocket
 							setPacket(recv_packet);
 						} while (recv_packet.type != Packet.Type.QUIT);
 					} catch (IOException e) { 
-						close("Disconnected with server: " + e.getMessage());
+						if (e.getMessage() == null) {
+							close("Disconnected with server");
+						} else {
+							close("Download error: " + e.getMessage());
+						}
                     } catch (ClassNotFoundException e) {
                         close("Fail to Serialized/Deserialized: " + e.getMessage());
                         System.exit(0);
                     } finally {
 						inputIsClosed = true;
-						if (outputIsClosed == false) {
-							sendQueue.push(new Packet(Packet.Type.QUIT, null));
-							localCache.setOfflineBySocket();
-						}
+						sendQueue.push(new Packet(Packet.Type.QUIT, null));
+						localCache.setOfflineBySocket();
+						System.err.println("Download closed");
                     }
 				} 
 			}).start();

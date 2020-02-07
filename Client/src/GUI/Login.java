@@ -94,7 +94,7 @@ public class Login extends View {
 		Button btnRegister = new Button("Register");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ViewFactory.changeView(Login.this, ViewType.REGISTER);
+				View.change(Login.this, ViewType.REGISTER);
 			}
 		});
 		btnRegister.setForeground(new Color(255, 0, 102));
@@ -159,7 +159,7 @@ public class Login extends View {
 				}
 				
 				if (logInSuccessful) {
-					ViewFactory.changeView(Login.this, ViewType.PROFILE);
+					View.change(Login.this, ViewType.PROFILE);
 				}
 			}
 		});

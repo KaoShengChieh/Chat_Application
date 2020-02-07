@@ -9,7 +9,11 @@ import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JSeparator;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,6 +25,7 @@ public class AddFriend extends View {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
+	private JTextPane txtpnOffline;
 	private JTextField SearchFriend;
 	private int xx,xy;
 
@@ -47,7 +52,7 @@ public class AddFriend extends View {
 		lblAddfriend.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(AddFriend.this, ViewType.ADD_FRIEND);
+				View.change(AddFriend.this, ViewType.ADD_FRIEND);
 			}
 		});
 		lblAddfriend.setIcon(new ImageIcon(AddFriend.class.getResource("image/userAdd.png")));
@@ -66,7 +71,7 @@ public class AddFriend extends View {
 				if (action == 0) {
 					try {
 						proxyServer.logOut();
-						ViewFactory.changeView(AddFriend.this, ViewType.LOGIN);
+						View.change(AddFriend.this, ViewType.LOGIN);
 					} catch (SQLException e) {
 						setErrorMessage(e.getMessage());
 					}
@@ -84,7 +89,7 @@ public class AddFriend extends View {
 		lblMsg.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ViewFactory.changeView(AddFriend.this, ViewType.FRIEND_LIST);
+				View.change(AddFriend.this, ViewType.FRIEND_LIST);
 			}
 		});
 		lblMsg.setHorizontalAlignment(SwingConstants.CENTER);
@@ -133,6 +138,20 @@ public class AddFriend extends View {
 		});
 		lblImg.setBounds(-97, -2, 552, 281);
 		lblImg.setVerticalAlignment(SwingConstants.TOP);
+		
+		txtpnOffline = new JTextPane();
+		txtpnOffline.setForeground(Color.WHITE);
+		txtpnOffline.setFont(new Font("Dialog", Font.BOLD, 12));
+		txtpnOffline.setEditable(false);
+		txtpnOffline.setText("You are offline right now");
+		txtpnOffline.setBackground(Color.LIGHT_GRAY);
+		txtpnOffline.setBounds(45, 0, 362, 22);
+		txtpnOffline.setVisible(false);
+		StyledDocument doc = txtpnOffline.getStyledDocument();
+		SimpleAttributeSet center = new SimpleAttributeSet();
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		contentPane.add(txtpnOffline);
 		
 		JLabel lblAddFriend = new JLabel("Add Friend");
 		lblAddFriend.setBackground(new Color(0, 102, 204));
@@ -185,5 +204,8 @@ public class AddFriend extends View {
 		contentPane.add(button);
 	}
 	
-	public void getOffline(){}
+	public void setOnline(boolean isOnline) {
+		super.setOnline(isOnline);
+		txtpnOffline.setVisible(isOnline == false);
+	}
 }

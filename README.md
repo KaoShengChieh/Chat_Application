@@ -21,7 +21,7 @@ $ ./run.sh
 
 This is the starting page of the program. A user  can log in only when he/she has registered an account. "Keep log in" check box enables automatic login when the user opens the chat application next time.
 
-![](https://i.imgur.com/owitALG.png | width=200)
+<img src="https://i.imgur.com/owitALG.png" width="200">
 ---
 
 ### Register

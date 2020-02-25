@@ -21,13 +21,13 @@ $ ./run.sh
 
 This is the starting page of the program. A user can log in only when he/she has registered an account. "Keep log in" check box enables automatic login when the user opens the chat application next time.
 
-<img src="https://i.imgur.com/owitALG.png" width="600">
+<img src="https://i.imgur.com/owitALG.png" width="500">
 
 ### Register
 
 User can register a new account here. Note that the registration could fail if the user entered a user name of an existing account or password is not confirmed.
 
-<img src="https://i.imgur.com/qVtscMD.png" width="600">
+<img src="https://i.imgur.com/qVtscMD.png" width="500">
 
 ### Home
 
@@ -56,6 +56,7 @@ The users can start chatting now. The send button is on the right-down corner of
 
 ### Offline
 
+If you are not connect to network, the bar on the top will appear to inform you. You can still use the application except sending message and adding friends. The application would try reconnecting automatically.
 
 <img src="https://i.imgur.com/IYMF04l.png" width="600">
 

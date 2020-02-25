@@ -19,7 +19,7 @@ $ ./run.sh
 
 ### Login
 
-This is the starting page of the program. A user  can log in only when he/she has registered an account. "Keep log in" check box enables automatic login when the user opens the chat application next time.
+This is the starting page of the program. A user can log in only when he/she has registered an account. "Keep log in" check box enables automatic login when the user opens the chat application next time.
 
 <img src="https://i.imgur.com/owitALG.png" width="600">
 
@@ -73,17 +73,17 @@ Put the file you wants to send in the “data” folder under your client folder
 
 ### Logout
 
-You can logout by pressing the last button of the bar on the left, and you would be redirected to the Login page.
+You can log out by pressing the last button of the bar on the left, and you would be redirected to the Login page.
 
-<img src="https://i.imgur.com/72xjuga.png" width="400">
+<img src="https://i.imgur.com/hYcjUt8.png" width="400">
 
 ## System & Program Design
 
 ### Architecture of Client Side
-Bearing [model-view-controller design pattern](https://en.wikipedia.org/wiki/Model-view-controller) in mind, I divide the related pro-gram logic in application of client side (abbreviated as “Chat Application” or “Chat App” in the rest of report for convenience) into three interconnected components:
-1. Model: Local Cache
-2. View: Graphical Interface, which is built with Java Swing
-3. Controller: Proxy Server
+Bearing [model-view-controller design pattern](https://en.wikipedia.org/wiki/Model-view-controller) in mind, I divide the related program logic in application of client side (abbreviated as “Chat Application” or “Chat App” in the rest of report for convenience) into three interconnected components:
+* **Model**: Local Cache
+* **View**: Graphical Interface, which is built with Java Swing
+* **Controller**: Proxy Server
 
 <img src="https://i.imgur.com/HZVME40.png" width="600">
 
@@ -94,11 +94,11 @@ There are also three rules for Proxy Server:
 
 Whether Chat App is online or not is determined by the state of Client Socket.
 
-You may discover that our application can be well-functioning despite it does not connect to Real Server. It virtually takes care of all requests from user. That’s why I call it Proxy Server.
+You may discover that my application can be well-functioning despite it does not connect to Real Server. It virtually takes care of all requests from user. That’s why I call it Proxy Server.
 
 ### Schema of Whole Project
 
-This schema is adapted from our project 1 “TCP ping”, in which server provides service with thread per client. To deal with concurrency control, I furthermore build a database controller to ensure log and data are correct. Honestly speaking, however, this sometimes gets our program into deadlock.
+In this schema, server provides service with thread per client. To deal with concurrency control, I furthermore build a database controller to ensure log and data are correct. Honestly speaking, however, this sometimes gets the program into deadlock.
 
 ![](https://i.imgur.com/Ay8XpbE.png)
 
@@ -106,19 +106,19 @@ Because Server processes request from multiple Chat Apps simultaneously. In orde
 
 On the other hand, the request and its implementation are packaged into [Strategy objects](https://en.wikipedia.org/wiki/Strategy_pattern), so Client Handler does not need to know the services provided by the Client when it throws the request.
 
-<img src="https://i.imgur.com/cbeOspl.png" width="600">
+<img src="https://i.imgur.com/cbeOspl.png" width="400">
 
 ### Asynchronous Message
 
 Considering the Client Handler List of current users as a “subject” in the [Observer pattern](https://en.wikipedia.org/wiki/Observer_pattern), I establish “observers” for each Chat Apps connected to the Server. Subjects are subscribed by multiple observers. When a subject's state changes, it must notify all observers who subscribe to it. Observers take actions depending on the state of the subject.
 
-The diagram in next page shows an example on how a message is sent from one to the other.
+The diagram below shows an example on how a message is sent from one to the other.
 
 ![](https://i.imgur.com/hVC2kF9.png)
 
 1-4: One receiving the request from Chat App A, Server tries to write logs into Database and sends ACK back to Chat App A if it successes. Client A may reject or defer the request due to concurrency control.
 
-5: Client Handler A calls upon other Client Handlers that there is a new message from User A to User B. Note that it notifies all Client Handlers corresponding to either User A or User B. This is because our Chat App supports single user logging in with multiple machines (e.g. log in with laptop and smartphone simultaneously).
+5: Client Handler A calls upon other Client Handlers that there is a new message from User A to User B. Note that it notifies all Client Handlers corresponding to either User A or User B. This is because my Chat App supports single user logging in with multiple machines (e.g. log in with laptop and smartphone simultaneously).
 
 6-7: Server sends the message to Chat App B. And then, the Proxy Server in Chat App of B takes the job.
 
@@ -132,5 +132,4 @@ Besides, it seems impossible to have two I/O policies in single TCP channel. I c
 
 ![](https://i.imgur.com/VekvLyY.png)
 
-Note that both User A and User B must be online. If one of them is offline during transmission, the transmission fails and no log is written into database at all, which result in synchronous transfer.
-
+Note that both User A and User B must be online. If one of them is offline during transmission, the transmission fails and no log is written into database at all. That’s why it is a synchronous transfer.

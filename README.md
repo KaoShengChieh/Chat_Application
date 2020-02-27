@@ -1,7 +1,7 @@
 Chat Application
 ===
 
-## What is it ?
+## What is it?
 
 This a desktop chat application.
 
@@ -9,11 +9,11 @@ Yes. That's it.
 
 You've known how to use it without even taking a glance at [User & Operator Guide](#user--operator-guide) below since it is cut from the same cloth as other chat applications like <img src="https://lh3.googleusercontent.com/74iMObG1vsR3Kfm82RjERFhf99QFMNIY211oMvN636_gULghbRBMjpVFTjOK36oxCbs=s360-rw" width="18"> or <img src="https://lh3.googleusercontent.com/rkBi-WHAI-dzkAIYjGBSMUToUoi6SWKoy9Fu7QybFb6KVOJweb51NNzokTtjod__MzA=s360-rw" width="20">.
 
-Nonetheless, it is worthwhile to look at [System & Program Design](#system--program-design), in which I will bring you into details about how the system is built, why offline browsing is possible, how the server handles concurrency issue,  what will happen if multiple devices log in with same account, how the application sends any type of the file, and so forth.
+Nonetheless, it is worthwhile to look at [System & Program Design](#system--program-design), in which I will bring you into details about how I build the system, why offline browsing is possible, how the server handles concurrency issue,  what will happen if multiple devices log in with same account, how the application sends any type of the file, and so forth.
 
 ## Table of Contents
 - [What is it?](#what-is-it)
-- [Instructions on How to Run Server & Clients](#instuctions-on-how-to-run-server--clients)
+- [Instructions on How to Run Server & Clients](#instructions-on-how-to-run-server--clients)
 - [User & Operator Guide](#user--operator-guide)
 - [System & Program Design](#system--program-design)
   - [Architecture of Client Side](#architecture-of-client-side)

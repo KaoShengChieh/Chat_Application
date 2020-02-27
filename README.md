@@ -1,4 +1,27 @@
-## Instructions on how to run server & clients
+Chat Application
+===
+
+## What is it ?
+
+This a desktop chat application.
+
+Yes. That's it.
+
+You've known how to use it without even taking a glance at [User & Operator Guide](#user--operator-guide) below since it is cut from the same cloth as other chat applications like <img src="https://lh3.googleusercontent.com/74iMObG1vsR3Kfm82RjERFhf99QFMNIY211oMvN636_gULghbRBMjpVFTjOK36oxCbs=s360-rw" width="18"> or <img src="https://lh3.googleusercontent.com/rkBi-WHAI-dzkAIYjGBSMUToUoi6SWKoy9Fu7QybFb6KVOJweb51NNzokTtjod__MzA=s360-rw" width="20">.
+
+Nonetheless, it is worthwhile to look at [System & Program Design](#system--program-design), in which I will bring you into details about how the system is built, why offline browsing is possible, how the server handles concurrency issue,  what will happen if multiple devices log in with same account, how the application sends any type of the file, and so forth.
+
+## Table of Contents
+- [What is it?](#what-is-it)
+- [Instructions on How to Run Server & Clients](#instuctions-on-how-to-run-server--clients)
+- [User & Operator Guide](#user--operator-guide)
+- [System & Program Design](#system--program-design)
+  - [Architecture of Client Side](#architecture-of-client-side)
+  - [Schema of Whole Project](#schema-of-whole-project)
+  - [Asynchronous Message](#asynchronous-message)
+  - [Non-Blocking Synchronous File Transfer](#non-blocking-synchronous-file-transfer)
+
+## Instructions on How to Run Server & Clients
 
 1. Install [Java SE Development Kit 11](https://www.oracle.com/technetwork/java/javase/downloads/jdk11-downloads-5066655.html)
 2. For Server side, execute the command below:
@@ -81,7 +104,7 @@ You can log out by pressing the last button of the bar on the left, and you woul
 ## System & Program Design
 
 ### Architecture of Client Side
-Bearing [model-view-controller design pattern](https://en.wikipedia.org/wiki/Model-view-controller) in mind, I divide the related program logic in application of client side (abbreviated as “Chat Application” or “Chat App” in the rest of report for convenience) into three interconnected components:
+Bearing [model-view-controller design pattern](https://en.wikipedia.org/wiki/Model-view-controller) in mind, I divide the related program logic in application of client side (abbreviated as “Chat Application” or “Chat App” in remaining article for convenience) into three interconnected components:
 * **Model**: Local Cache
 * **View**: Graphical Interface, which is built with Java Swing
 * **Controller**: Proxy Server

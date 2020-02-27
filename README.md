@@ -59,13 +59,13 @@ If login successfully, the program would direct the user to the home page which 
 <img src="https://i.imgur.com/iDJnQk2.png" width="300">
 
 ### Add Friend
-Pressing the third button of the bar on the left would direct you to add friend page. You can enter an existing username in order to add that user. If the user name doesn’t exist or the user tries to add himself/herseld, the error message would be shown.
+Pressing the third button of the bar on the left would direct you to add friend page. You can enter an existing username in order to add that user. If the user name doesn’t exist or the user tries to add himself/herself, the error message would be shown.
 
 <img src="https://i.imgur.com/pbIWmIM.png" width="400">
 
 ### Friend List
 
-After adding a friend successfully, you will see your friend’s name appearing on Friend List. If you wants to chat with a friend, you simply click the name of the friend.
+After adding a friend successfully, you will see your friend’s name appearing on Friend List. If you want to chat with a friend, you simply click the name of the friend.
 
 <img src="https://i.imgur.com/LVHfxY9.png" width="600">
 
@@ -79,7 +79,7 @@ The users can start chatting now. The send button is on the right-down corner of
 
 ### Offline
 
-If you are not connect to network, the bar on the top will appear to inform you. You can still use the application except sending message and adding friends. The application would try reconnecting automatically.
+If you are not connecting to network, the bar on the top will appear to inform you. You can still use the application except sending message and adding friends. The application would try reconnecting automatically.
 
 <img src="https://i.imgur.com/IYMF04l.png" width="600">
 
@@ -91,7 +91,7 @@ The buttons on the Chats and Friend List page will show the latest message from 
 
 ### Send File
 
-Put the file you wants to send in the “data” folder under your client folder, and press the paper clip button on the left corner after filling the file name. The file will be sent to your friend’s “data” folder under his/her client folder.
+Put the file you want to send in the “data” folder under your client folder, and press the paper clip button on the left corner after filling the file name. The file will be sent to your friend’s “data” folder under his/her client folder.
 
 <img src="https://i.imgur.com/knxyLpF.png" width="600">
 

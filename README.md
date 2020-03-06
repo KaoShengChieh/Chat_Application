@@ -81,7 +81,7 @@ The users can start chatting now. The send button is on the right-down corner of
 
 If you are not connecting to network, the bar on the top will appear to inform you. You can still use the application except sending message and adding friends. The application would try reconnecting automatically.
 
-<img src="https://i.imgur.com/IYMF04l.png" width="700">
+<img src="https://i.imgur.com/IYMF04l.png" width="800">
 
 ### Message Button
 
